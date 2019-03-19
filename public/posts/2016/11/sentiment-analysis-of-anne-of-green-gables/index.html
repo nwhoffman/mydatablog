@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author"
+    content="map[name:Nicole Hoffman]">
+<meta name="description"
+    content="Anne of Green Gables is probably the best known novel by Canadian author Lucy Maude Montgomery. The series of eight novels, of which Anne of Green Gables is the first, revolves around Anne Shirley and her life from age 11 until the end of the first world war, when she is 40 years old. I enjoy almost all of Montgomery&amp;rsquo;s books so I thought it would be interesting to take a closer look at her work using some natural language processing techniques, specifically sentiment analysis." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://nicolew.xyz/posts/2016/11/sentiment-analysis-of-anne-of-green-gables/" />
+
+
+<title>
+    
+    Sentiment Analysis of Anne of Green Gables :: Nicole W.  — data and science
+    
+</title>
+
+
+
+<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Source+Code+Pro" rel="stylesheet"
+    type="text/css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.2.1/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+<link rel="stylesheet" href="https://nicolew.xyz/scss/main.min.099699ab246bf26f50616f7c9f00c79d46110459d1bd727b2d07d6fc09ece082.css">
+
+
+
+<link rel="apple-touch-icon" sizes="180x180" href="https://nicolew.xyz/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://nicolew.xyz/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://nicolew.xyz/favicon-16x16.png">
+<link rel="manifest" href="https://nicolew.xyz/site.webmanifest">
+<link rel="mask-icon" href="https://nicolew.xyz/safari-pinned-tab.svg" color="#252627">
+<link rel="shortcut icon" href="https://nicolew.xyz/favicon.ico">
+<meta name="theme-color" content="#252627">
+<meta itemprop="name" content="Sentiment Analysis of Anne of Green Gables">
+<meta itemprop="description" content="Anne of Green Gables is probably the best known novel by Canadian author Lucy Maude Montgomery. The series of eight novels, of which Anne of Green Gables is the first, revolves around Anne Shirley and her life from age 11 until the end of the first world war, when she is 40 years old. I enjoy almost all of Montgomery&rsquo;s books so I thought it would be interesting to take a closer look at her work using some natural language processing techniques, specifically sentiment analysis.">
+
+
+<meta itemprop="datePublished" content="2016-11-12T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2016-11-12T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="3000">
+
+
+
+<meta itemprop="keywords" content="nlp," />
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://nicolew.xyz"/>
+
+<meta name="twitter:title" content="Sentiment Analysis of Anne of Green Gables"/>
+<meta name="twitter:description" content="Anne of Green Gables is probably the best known novel by Canadian author Lucy Maude Montgomery. The series of eight novels, of which Anne of Green Gables is the first, revolves around Anne Shirley and her life from age 11 until the end of the first world war, when she is 40 years old. I enjoy almost all of Montgomery&rsquo;s books so I thought it would be interesting to take a closer look at her work using some natural language processing techniques, specifically sentiment analysis."/>
+
+
+
+
+<meta property="article:published_time" content="2016-11-12 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+    </head>
+
+    <body class="dark-theme">
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://nicolew.xyz/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">nicolew.xyz</span>
+            <span class="logo__cursor"></span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://nicolew.xyz/about/">About</a></li><li><a href="https://nicolew.xyz/resume/">Resume</a></li><li><a href="https://nicolew.xyz/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+
+            <span class="theme-toggle"><svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+</span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+    <main class="post">
+
+        <div class="post-info">
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>15 minutes
+
+            
+
+            </p>
+        </div>
+
+        <article>
+            <h2 class="post-title"><a href="https://nicolew.xyz/posts/2016/11/sentiment-analysis-of-anne-of-green-gables/">Sentiment Analysis of Anne of Green Gables</a></h2>
+
+            
+
+            <div class="post-content">
+                
+
+<p><em>Anne of Green Gables</em> is probably the best known novel by Canadian author <a href="https://en.wikipedia.org/wiki/Lucy_Maud_Montgomery" target="_blank">Lucy Maude Montgomery</a>. The series of eight novels, of which <em>Anne of Green Gables</em> is the first, revolves around Anne Shirley and her life from age 11 until the end of the first world war, when she is 40 years old. I enjoy almost all of Montgomery&rsquo;s books so I thought it would be interesting to take a closer look at her work using some natural language processing techniques, specifically sentiment analysis.</p>
+
+<h3 id="natural-language-processing">Natural Language Processing</h3>
+
+<p>So, what is natural language processing (NLP)? Basically, it is the process of using computers to analyze and extract information from natural (human) language. NLP is field of study that overlaps with computer science, artificial intelligence, and computational linguistics. Some of the more common or familiar tasks in NLP include: machine translation, automatic summarization, speech recognition, parsing (analyze grammar), and sentiment analysis.</p>
+
+<p>Sentiment analysis is used to quantify the emotional state or attitude of a speaker or writer. This is usually determined by measuring the polarity of the words in the text: are they positive, negative, or neutral? A sentiment polarity value can be determined for an individual word, a complete sentence, or an arbitrary chunk of text such as a tweet or movie review.</p>
+
+<p>This sentiment analysis of <em>Anne of Green Gables</em> will focus on how the relative sentiment polarity changes over the course of the novel. Eventually, I would like to analyze the sentiment for each of the novels in the <em>Anne</em> series and compare with the sentiment of the novels in the <em>Emily</em> series. In order to analyze the novel, we need the next! Almost all of Montgomery&rsquo;s work is available at <a href="http://www.gutenberg.org/wiki/Main_Page" target="_blank">Project Gutenberg</a>.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Import this stuff to make Python 3 functions work in Python 2</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">from</span> <span class="nn">urllib2</span> <span class="kn">import</span> <span class="n">urlopen</span>
+<span class="kn">from</span> <span class="nn">unidecode</span> <span class="kn">import</span> <span class="n">unidecode</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&#34;http://www.gutenberg.org/files/45/45-0.txt&#34;</span> <span class="c1"># text for &#34;Anne of Green Gables&#34;</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="n">raw</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="c1"># Convert bytes to unicode</span>
+<span class="n">raw_decode</span> <span class="o">=</span> <span class="n">unidecode</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="c1"># Decode some &#34;weird&#34; characters to the closest ascii equivalent</span>
+<span class="n">raw_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_decode</span><span class="p">)</span> <span class="c1"># Convert from unicode string to plain string</span>
+<span class="n">raw_string</span> <span class="o">=</span> <span class="n">raw_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="c1"># replace the &#34; \r\n &#34; characters with a space</span></code></pre></div>
+<p>Now we have the text of the novel, including the header and footer information from Project Gutenberg. The text is currently a single string of characters, including punctuation and spaces. The header (and the list of chapters) and the standard footer will be sliced out to end up with just the body of the novel.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Remove the header, footer, and chapter list</span>
+<span class="n">start</span> <span class="o">=</span> <span class="n">raw_string</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&#34;MRS. Rachel Lynde lived just where the Avonlea&#34;</span><span class="p">)</span>
+<span class="n">stop</span> <span class="o">=</span> <span class="n">raw_string</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&#34;End of Project Gutenberg&#39;s&#34;</span><span class="p">)</span>
+<span class="n">raw_string</span> <span class="o">=</span> <span class="n">raw_string</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span></code></pre></div>
+<h3 id="tokenization">Tokenization</h3>
+
+<p>Because the text is a single long string of characters, it needs to be tokenized or broken down into smaller pieces of text. In natural language processing, tokens are usually words or sentences. I will be using the <a href="https://github.com/cjhutto/vaderSentimentsentiment" target="_blank">VADER</a> analysis tool, which was designed to classify the sentiment of text at the sentence level, so that&rsquo;s what we&rsquo;ll do. We&rsquo;ll take a closer look at VADER in a minute but first the text needs to be parsed into sentences.</p>
+
+<p>If you are using python for NLP tasks, you are probably going to be using the <a href="http://www.nltk.org/" target="_blank">Natural Language Tool Kit (NLTK)</a>. Let&rsquo;s tokenize and then take a look at some of the sentences to make sure the string was broken down correctly. You will need to have installed the NLTK from the above link before importing the modules.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Import the the NLTK package and the sentence tokenizer function</span>
+<span class="kn">import</span> <span class="nn">nltk</span>
+<span class="kn">from</span> <span class="nn">nltk</span> <span class="kn">import</span> <span class="n">sent_tokenize</span>
+
+<span class="c1"># Tokenize into sentences</span>
+<span class="n">sentences</span> <span class="o">=</span> <span class="n">sent_tokenize</span><span class="p">(</span><span class="n">raw_string</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&#34;Number of sentences in the novel:&#34;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sentences</span><span class="p">))</span></code></pre></div>
+<pre><code>Number of sentences in the novel: 6855
+</code></pre>
+
+<p>Let&rsquo;s look at a section of the novel to check the tokenization. How about the part where Anne describes the poor mouse who met an untimely end in the pudding sauce?</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Find the sentence index for the pudding sauce sentence</span>
+<span class="n">sauce</span> <span class="o">=</span> <span class="n">sentences</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&#34;She was terribly mortified about the pudding sauce last week.&#34;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sauce</span><span class="p">,</span><span class="n">sauce</span><span class="o">+</span><span class="mi">8</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">sentences</span><span class="p">[</span><span class="n">i</span><span class="p">])</span></code></pre></div>
+<pre><code>2904 She was terribly mortified about the pudding sauce last week.
+2905 We had a plum pudding for dinner on Tuesday and there was half the pudding and a pitcherful of sauce left over.
+2906 Marilla said there was enough for another dinner and told me to set it on the pantry shelf and cover it.
+2907 I meant to cover it just as much as could be, Diana, but when I carried it in I was imagining I was a nun - of course I'm a Protestant but I imagined I was a Catholic--taking the veil to bury a broken heart in cloistered seclusion; and I forgot all about covering the pudding sauce.
+2908 I thought of it next morning and ran to the pantry.
+2909 Diana, fancy if you can my extreme horror at finding a mouse drowned in that pudding sauce!
+2910 I lifted the mouse out with a spoon and threw it out in the yard and then I washed the spoon in three waters.
+2911 Marilla was out milking and I fully intended to ask her when she came in if I wouldd give the sauce to the pigs; but when she did come in I was imagining that I was a frost fairy going through the woods turning the trees red and yellow, whichever they wanted to be, so I never thought about the pudding sauce again and Marilla sent me out to pick apples.
+</code></pre>
+
+<p>Those sentences look good; there is a mix of longer and shorter sentences in addition to some dialogue that is correctly tokenized. Let&rsquo;s take a look at the sentiment polarity for each sentence. To do this, we finally get to talk about VADER. <a href="https://pypi.python.org/pypi/vaderSentiment" target="_blank">VADER</a> stands for &ldquo;Valence Aware Dictionary for sEntiment Reasoning&rdquo; and is a rule-based lexicon for evaluating sentiment polarity (positive or negative).</p>
+
+<p>Valence refers to verb valency or how a verb relates to the arguments in a sentence. The sentiment of some words or phrases in a sentence can be changed by other words present in the sentence. The words that modify the sentiment can be called valence-shifters. Examples of these are negatives (not, never), intensifiers (very, really), diminishers (a bit, slightly), and connectors (however, but, although). There is a lot more that could be said about VADER but I will leave that for another notebook.</p>
+
+<p>Let&rsquo;s look at a few sentences individually to see what sort of scores are returned from VADER. Since we already have part of the pudding sauce story printed above, we&rsquo;ll use a couple of those sentences. You will need to install the VADER library before using the sentiment tools.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># The following is to fix a problem of printing to the console after VADER is imported.</span>
+<span class="c1"># The system standard output variables are saved in nb_stdout and then reset after importing VADER</span>
+<span class="c1"># (fix from: https://github.com/cjhutto/vaderSentiment/issues/7)</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">nb_stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+<span class="kn">from</span> <span class="nn">vaderSentiment.vaderSentiment</span> <span class="kn">import</span> <span class="n">sentiment</span> <span class="k">as</span> <span class="n">vaderSentiment</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">nb_stdout</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2886</span><span class="p">,</span><span class="mi">2904</span><span class="p">,</span><span class="mi">2908</span><span class="p">,</span><span class="mi">2909</span><span class="p">]:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">sentences</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">vs</span> <span class="o">=</span> <span class="n">vaderSentiment</span><span class="p">(</span><span class="n">sentences</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\n\t</span><span class="s2">&#34;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vs</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&#34;</span><span class="se">\n\n</span><span class="s2">&#34;</span><span class="p">)</span></code></pre></div>
+<pre><code>The tumblerfuls were generous ones and the raspberry cordial was certainly very nice.
+
+    {'neg': 0.0, 'neu': 0.532, 'pos': 0.468, 'compound': 0.8313}
+
+
+She was terribly mortified about the pudding sauce last week.
+
+    {'neg': 0.286, 'neu': 0.714, 'pos': 0.0, 'compound': -0.5574}
+
+
+I thought of it next morning and ran to the pantry.
+
+    {'neg': 0.0, 'neu': 1.0, 'pos': 0.0, 'compound': 0.0}
+
+
+Diana, fancy if you can my extreme horror at finding a mouse drowned in that pudding sauce!
+
+    {'neg': 0.36, 'neu': 0.64, 'pos': 0.0, 'compound': -0.8356}
+</code></pre>
+
+<h3 id="sentiment-polarity">Sentiment Polarity</h3>
+
+<p>VADER returns the values for negative, neutral, positive, and compound. The compound is the overall polarity of the sentence, given as a number between -1 and 1. The higher the compound score, the more positive the sentiment of the sentence. The first sentence is quite positive but the second and last sentences are definitely more negative. The third sentence is pretty neutral, with a compound score of 0 since there are neither positive or negative words.</p>
+
+<p>Now that we have a better idea of what a sentiment value for different types of sentences looks like, we will go ahead and find the sentiment for all of the sentences in the novel. A definite advantage of VADER is that it is efficient (for a python program) and does not take very long at all to go through the entire novel (just a few seconds on my old-ish laptop running linux).</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Determine the score of each sentence and make a list of just the compound or polarity values</span>
+<span class="n">complete_score</span> <span class="o">=</span> <span class="p">[</span><span class="n">vaderSentiment</span><span class="p">(</span><span class="n">sentence</span><span class="p">)</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">sentences</span><span class="p">]</span>
+<span class="n">polarity</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;compound&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">complete_score</span><span class="p">]</span>
+
+<span class="c1"># Import the modules needed to use matplotlib and have the plots inline in the notebook</span>
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">rcParams</span>
+
+<span class="c1"># Plot the polarity of the sentiment as a function of sentence number in the text.</span>
+<span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">polarity</span><span class="p">,</span><span class="s1">&#39;b.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Sentence Index&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sentences</span><span class="p">),</span> <span class="o">-</span><span class="mf">1.10</span><span class="p">,</span> <span class="mf">1.10</span><span class="p">])</span></code></pre></div>
+<p><img src="https://nicolew.xyz/images/green_gables/output_11_1.png" alt="png" /></p>
+
+<p>That is a lot of sentences and sentiment values! It is difficult to see any patterns in the sentiment other than that is is more positive than negative and there are a number of neutral sentences (polarity = 0). In order to better visualize any changes, it would be helpful to apply a running average over a window of an appropriate width, the width being the number of sentences averaged together. If the window is too large, some of the changes in sentiment will be averaged away and changes on shorter &ldquo;time&rdquo; scales might be lost.</p>
+
+<p>To determine a good window width, we can calculate the averaged sentiment for a number of different window sizes and visually determine what looks to be the best. This is still going to be somewhat subjective in terms of what any given individual would deem &ldquo;too smooth&rdquo; or &ldquo;too noisy&rdquo;. And of course, it would depend on the novel. A really long novel with a slowly unfolding plot would probably do okay with averaging over a large window; a fast-paced or shorter book might do better with a smaller number of sentences averaged together.</p>
+
+<p>First, we&rsquo;ll define a function to calculate the running average.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Define a running mean function that averages over a given window of width N (width = number of sentences)</span>
+<span class="k">def</span> <span class="nf">running_mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+    <span class="n">run_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">run_sum</span><span class="p">[</span><span class="n">N</span><span class="p">:]</span><span class="o">-</span><span class="n">run_sum</span><span class="p">[:</span><span class="o">-</span><span class="n">N</span><span class="p">])</span><span class="o">/</span><span class="n">N</span>
+
+
+<span class="c1"># Calculate a new list (vector) of polarity values, averaged over the window </span>
+<span class="c1"># values of N between 50-80 sentences gave good results</span>
+<span class="n">polarity_ave</span> <span class="o">=</span> <span class="n">running_mean</span><span class="p">(</span><span class="n">polarity</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+
+<span class="c1"># Create a vector of values for the x-axis as a percentage of the novel</span>
+<span class="n">xvalues</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">polarity_ave</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">polarity_ave</span><span class="p">))]</span>
+
+<span class="c1"># Calculate another vectory of polarity values with a very small window (to compare later in a plot)</span>
+<span class="n">polarity_ave_small</span> <span class="o">=</span> <span class="n">running_mean</span><span class="p">(</span><span class="n">polarity</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Create a vector of values for the x-axis as a percentage of the novel</span>
+<span class="n">xvalues_small</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">polarity_ave_small</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">polarity_ave_small</span><span class="p">))]</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">6</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.75</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues_small</span><span class="p">,</span> <span class="n">polarity_ave_small</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues_small</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">polarity_ave_small</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Running Average with N = 5&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Percent of Novel&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity (averaged)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Running Average with N = 60&#39;</span><span class="p">)</span></code></pre></div>
+<p><img src="https://nicolew.xyz/images/green_gables/output_14_1.png" alt="png" /></p>
+
+<p>The top plot is using a running average with a small window (averaging over a small number of sentences) and is essentially the &ldquo;raw&rdquo; sentiment of the novel, showing how sentiment changes over short time scales. There are a lot of positive and negative spikes but we can start to see a little bit of a pattern when looking at the lower frequencies or longer time scales.</p>
+
+<p>The bottom plot with with a running average window of 60 sentences and it is now much easier to see changes in sentiment that happen over longer time intervals. There are definite high and low periods that were not averaged away. The magnitude of the sentiment decreased because of the averaging but since we are looking at relative changes over the course of the novel, the absolute scale shouldn&rsquo;t matter.</p>
+
+<p>To take a closer look at events in the novel, we&rsquo;ll split the novel in half and plot each part separately. We can also annotate the plot with what is happening in the novel. Because you were dying to know what all the positive and negative parts were, right?</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Make a string with the anne-otations to be added to the plot below</span>
+<span class="n">text</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Anne is not a boy&#39;</span><span class="p">,</span><span class="s1">&#39;Anne yells at Mrs. Lynde&#39;</span><span class="p">,</span><span class="s1">&#39;Anne meets Diana&#39;</span><span class="p">,</span><span class="s1">&#39;Diana gets drunk&#39;</span><span class="p">,</span><span class="s1">&#39;No more Diana!&#39;</span><span class="p">]</span>
+<span class="n">text</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;Haunted woods &amp; Mr. Phillips departs&#39;</span><span class="p">,</span><span class="s1">&#39;Anne</span><span class="se">\&#39;</span><span class="s1">s Broken ankle&#39;</span><span class="p">,</span><span class="s1">&#39;Miss Stacey!&#39;</span><span class="p">,</span><span class="s1">&#39;Charlottetown trip&#39;</span><span class="p">])</span>
+<span class="n">text</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;Miss Stacey leaves&#39;</span><span class="p">,</span><span class="s1">&#39;Anne wins the Avery&#39;</span><span class="p">])</span>
+
+<span class="c1"># Make more strings with the position of the text and arrows</span>
+<span class="n">xy_pos</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">7.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.08</span><span class="p">),(</span><span class="mf">22.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.18</span><span class="p">),(</span><span class="mf">28.44</span><span class="p">,</span><span class="mf">0.25</span><span class="p">),(</span><span class="mf">42.28</span><span class="p">,</span><span class="mf">0.25</span><span class="p">),(</span><span class="mf">43.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.175</span><span class="p">)]</span>
+<span class="n">xytext_pos</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">6.8</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">),(</span><span class="mi">24</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">),(</span><span class="mi">24</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),(</span><span class="mi">43</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),(</span><span class="mi">44</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">)]</span>
+
+<span class="n">xy_pos</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="mf">55.7</span><span class="p">,</span><span class="o">-</span><span class="mf">0.18</span><span class="p">),(</span><span class="mf">61.75</span><span class="p">,</span><span class="o">-</span><span class="mf">0.12</span><span class="p">),(</span><span class="mf">63.4</span><span class="p">,</span><span class="mf">0.375</span><span class="p">),(</span><span class="mi">77</span><span class="p">,</span><span class="mf">0.3</span><span class="p">),(</span><span class="mf">84.33</span><span class="p">,</span><span class="o">-</span><span class="mf">0.13</span><span class="p">),(</span><span class="mf">92.79</span><span class="p">,</span><span class="mf">0.3</span><span class="p">)])</span>
+<span class="n">xytext_pos</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="mf">56.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">),(</span><span class="mi">62</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">),(</span><span class="mf">64.75</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),(</span><span class="mi">73</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),(</span><span class="mi">81</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">),(</span><span class="mi">93</span><span class="p">,</span><span class="mf">0.45</span><span class="p">)])</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity (averaged)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Running Average with N = 60&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xy</span><span class="o">=</span><span class="n">xy_pos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xytext</span><span class="o">=</span><span class="n">xytext_pos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">arrowprops</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;arrowstyle&#39;</span><span class="p">:</span> <span class="s1">&#39;-&#39;</span><span class="p">},</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Percent of Novel&#39;</span><span class="p">),</span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity (averaged)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">11</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xy</span><span class="o">=</span><span class="n">xy_pos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xytext</span><span class="o">=</span><span class="n">xytext_pos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">arrowprops</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;arrowstyle&#39;</span><span class="p">:</span> <span class="s1">&#39;-&#39;</span><span class="p">},</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span></code></pre></div>
+<p><img src="https://nicolew.xyz/images/green_gables/output_17_0.png" alt="png" /></p>
+
+<p>The parts of the novel that a reader would likely identify as positive (new best friend, lovely new teacher, winning a scholarship) are the parts with the highest sentiment polarity. And the parts of the novel that are more negative (yelling at someone, missing a best friend, injury, and sickness) are t!e sections with the most negative sentiment. It looks like VADER did a pretty good job with this text.</p>
+
+<p>Let&rsquo;s take a look at another sentiment classifier and how the results compare to VADER. There is a handy text processing library called <a href="https://textblob.readthedocs.io/en/dev/" target="_blank">TextBlob</a> that makes it much easier to implement many of the functions available in the NLTK. The default sentiment classifier used by TextBlob is the <a href="http://www.clips.ua.ac.be/pattern" target="_blank">PatternAnalyzer</a>. The TextBlob module needs to be installed before you can use the functions.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># TextBlob</span>
+<span class="kn">from</span> <span class="nn">textblob</span> <span class="kn">import</span> <span class="n">TextBlob</span>
+
+<span class="c1"># Use the TextBlob to tokenize the raw string and make a textblob object</span>
+<span class="n">anne_blob</span> <span class="o">=</span> <span class="n">TextBlob</span><span class="p">(</span><span class="n">raw_string</span><span class="p">)</span>
+
+<span class="c1"># Determine the sentiment using the PatternAnalyzer (based on the pattern library)</span>
+<span class="n">blob_sentiment</span> <span class="o">=</span> <span class="p">[</span><span class="n">sentence</span><span class="o">.</span><span class="n">sentiment</span><span class="o">.</span><span class="n">polarity</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">anne_blob</span><span class="o">.</span><span class="n">sentences</span><span class="p">]</span></code></pre></div>
+<p>And then we can plot the sentiment as a function of sentence index.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plot the polarity of the sentiment as a function of sentence number in the text.</span>
+<span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">blob_sentiment</span><span class="p">,</span><span class="s1">&#39;b.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Sentence Index&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity&#39;</span><span class="p">)</span>
+<span class="n">xmax</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">blob_sentiment</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.10</span><span class="p">,</span> <span class="mf">1.10</span><span class="p">])</span></code></pre></div>
+<p><img src="https://nicolew.xyz/images/green_gables/output_21_1.png" alt="png" /></p>
+
+<p>The sentiment values from the PatternAnalyzer classifier looks similar to those determined by VADER. The sentiment is overall more positive than negative and tends toward more positive values near the end of novel. The polarity values also tend to cluster at 0.5, 1.0, and -1.0; I&rsquo;m not quite sure what is causing that.</p>
+
+<p>In order to better compare the two sentiment classifiers, I&rsquo;ll make another plot. But first, the TextBlob sentiment also needs to be averaged using the same method applied to the VADER sentiment values. Then come the plots!</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Calculate a new list (vector) of polarity values, averaged over the window N = 60</span>
+<span class="n">blob_ave</span> <span class="o">=</span> <span class="n">running_mean</span><span class="p">(</span><span class="n">blob_sentiment</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+
+<span class="c1"># Create a vector of values for the x-axis as a percentage of the novel</span>
+<span class="n">xvalues_blob</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">blob_ave</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">blob_ave</span><span class="p">))]</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plot the sentiment for each classifier</span>
+<span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity (averaged)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;VADER Sentiment (running average window = 60)&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues_blob</span><span class="p">,</span> <span class="n">blob_ave</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues_blob</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">blob_ave</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Percent of Novel&#39;</span><span class="p">),</span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity (averaged)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;TextBlob/Pattern Sentiment (running average window = 60)&#39;</span><span class="p">)</span></code></pre></div>
+<p><img src="https://nicolew.xyz/images/green_gables/output_24_1.png" alt="png" /></p>
+
+<p>The results look reasonably similar but there are some notable differences. First, using VADER, there is a big dip into negative sentiments when Anne yells at Mrs. Lynde - that is the first time that anything really negative happens in the novel. The PatternAnalyzer almost completely misses it, with only a small dip in sentiment about a quarter of the way through the novel. In general, VADER picks up more negative sentiment overall than PatternAnalyzer. This would certainly be something to examine further.</p>
+
+<p>There are many other interesting things to analyze: sentence length, word length, word frequency, and other sentiment classifiers. We&rsquo;ll look at just a couple of them now. First, let&rsquo;s take a look at a histogram of sentence length, as determined by the number of characters in a sentence. These types of histograms would be interesting to compare for the rest of the books in the <em>Anne</em> series in addition to the other work by Montgomery. Using sentences of different lengths adds variety and interest to a piece of writing and different authors have different distributions of sentence length.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Make a histogram of sentence lengths (in this case, the number of characters per sentence)</span>
+<span class="n">sen_length</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">sentence</span><span class="p">)</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">sentences</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">sen_length</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Number&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Sentence Length (characters)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Anne of Green Gables&#39;</span><span class="p">)</span></code></pre></div>
+<p><img src="https://nicolew.xyz/images/green_gables/output_26_1.png" alt="png" /></p>
+
+<p>We can also look at how sentence length compares to the sentiment. Do longer sentences tend to be positive or negative? Will there be any correlation at all between sentence length and sentiment? Let&rsquo;s find out.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plot the sentiment score as a function of sentence length</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sen_length</span><span class="p">,</span> <span class="n">polarity</span><span class="p">,</span><span class="s1">&#39;b.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">450</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Sentence Length (number of characters)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Sentiment as a Function of Sentence Length&#39;</span><span class="p">)</span></code></pre></div>
+<p><img src="https://nicolew.xyz/images/green_gables/output_28_1.png" alt="png" /></p>
+
+<p>There doesn&rsquo;t seem to be too much here. There is again a trend toward sentences of all length being more positive, but we already saw that in the other plots.</p>
+
+<h3 id="more-to-come">More to Come!</h3>
+
+<p>Overall, the sentiment analysis of <em>Anne of Green Gables</em> was a success! I am actually pleasantly suprised at how well the sentiment changes were captured over the whole novel. This is just the start of analyzing Montgomery&rsquo;s writing, so please check back in to read more.</p>
+
+            </div>
+        </article>
+
+        <hr />
+
+        <div class="post-info">
+                <p>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="https://nicolew.xyz/tags/nlp">nlp</a></span>
+                </p>
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>3000 Words</p>
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2016-11-11</p>
+        </div>
+
+        
+            <div class="pagination">
+                <div class="pagination__title">
+                    <span class="pagination__title-h"></span>
+                    <hr />
+                </div>
+
+                <div class="pagination__buttons">
+                    
+                        <span class="button previous">
+                            <a href="https://nicolew.xyz/posts/2016/11/an-analysis-of-gilmore-girls-rankings/">
+                                <span class="button__icon">←</span>
+                                <span class="button__text">An Analysis of Gilmore Girls Rankings</span>
+                            </a>
+                        </span>
+                    
+
+                    
+                </div>
+            </div>
+        
+
+        
+    </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2019</span>
+            
+                <span><a href="https://nicolew.xyz">Nicole Hoffman</a></span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
+            <span> <a href="https://nicolew.xyz/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">rhazdon</a></span>
+        </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+
+<script type="text/javascript" src="https://nicolew.xyz/js/bundle.dd80b4936d9208f7384932ce622316900942c58cd138dd354b6a863e212c7fd1c951c7c3e5b83585da6297165e02ddfddbe523bbb46478a41628469263b7f000.js" integrity="sha512-3YC0k22SCPc4STLOYiMWkAlCxYzRON01S2qGPiEsf9HJUcfD5bg1hdpilxZeAt392&#43;Uju7RkeKQWKEaSY7fwAA=="></script>
+
+
+
+    </body>
+</html>

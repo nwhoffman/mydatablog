@@ -1,0 +1,1470 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Posts on Nicole W.</title>
+        <link>https://nicolew.xyz/posts/</link>
+        <description>Recent content in Posts on Nicole W.</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
+        <lastBuildDate>Thu, 14 Mar 2019 00:00:00 +0000</lastBuildDate>
+        <atom:link href="https://nicolew.xyz/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Kilauea 2018 earthquakes - Visualization with Bokeh</title>
+            <link>https://nicolew.xyz/posts/2019/03/kilauea-2018-earthquakes---visualization-with-bokeh/</link>
+            <pubDate>Thu, 14 Mar 2019 00:00:00 +0000</pubDate>
+            
+            <guid>https://nicolew.xyz/posts/2019/03/kilauea-2018-earthquakes---visualization-with-bokeh/</guid>
+            <description>The 2018 eruption of Kilauea volcano in Hawaii was accompanied by thousands of small earthquakes over the course of the eruption. This seismicity exhibited an interesting pattern: cycles of increasing earthquake frequency, each ending with a larger magnitude explosive event. Over the course of the 2+ month eruption, there were over 50 of these cycles.
+The Bokeh plotting library provides a lot of great tools to look at a dataset like this, where it might be useful to zoom in on certain cycles or look only at a particular date.</description>
+            <content type="html"><![CDATA[
+
+<p>The <a href="https://en.wikipedia.org/wiki/2018_lower_Puna_eruption" target="_blank">2018 eruption of Kilauea volcano in Hawaii</a> was accompanied by thousands of small earthquakes over the course of the eruption. This seismicity exhibited an interesting pattern: cycles of increasing earthquake frequency, each ending with a larger magnitude explosive event. Over the course of the 2+ month eruption, there were over 50 of these cycles.</p>
+
+<p>The <a href="https://bokeh.pydata.org/en/latest/" target="_blank">Bokeh</a> plotting library provides a lot of great tools to look at a dataset like this, where it might be useful to zoom in on certain cycles or look only at a particular date. Here, we will start with a simple plot, using only circles and line segments.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plotting</span>
+<span class="kn">import</span> <span class="nn">bokeh</span>
+<span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="n">figure</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">show</span>
+<span class="kn">from</span> <span class="nn">bokeh.io</span> <span class="kn">import</span> <span class="n">output_notebook</span>
+<span class="kn">from</span> <span class="nn">bokeh.models</span> <span class="kn">import</span> <span class="n">Range1d</span>
+
+<span class="c1"># Data analysis</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span></code></pre></div>
+<h4 id="usgs-earthquake-data">USGS earthquake data</h4>
+
+<p>The earthquake event data was downloaded from the <a href="https://earthquake.usgs.gov/earthquakes/search/" target="_blank">USGS Earthquake Catalog</a>. Before we could use it for this plotting exercise, it needed to be cleaned up a bit. After combining the separate files, dropping uneeded columns, and sorting by increasing date, the data is ready to be loaded in.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Read in the data for the earthquakes</span>
+<span class="n">events</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;/home/nicole/earthquakes/kilauea/data/all_events_M15.csv&#39;</span><span class="p">)</span>
+<span class="n">events</span><span class="o">.</span><span class="n">head</span><span class="p">()</span></code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>DTtime</th>
+      <th>depth</th>
+      <th>mag</th>
+      <th>magType</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2018-04-28 11:29:50.700</td>
+      <td>0.27</td>
+      <td>2.08</td>
+      <td>ml</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2018-04-28 23:09:53.430</td>
+      <td>0.27</td>
+      <td>2.12</td>
+      <td>ml</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2018-04-29 05:46:18.950</td>
+      <td>0.23</td>
+      <td>1.90</td>
+      <td>ml</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2018-04-29 09:33:02.850</td>
+      <td>1.39</td>
+      <td>1.95</td>
+      <td>ml</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2018-05-01 06:34:32.670</td>
+      <td>1.81</td>
+      <td>1.78</td>
+      <td>md</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Read in the data for the explosions</span>
+<span class="n">explode</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;/home/nicole/earthquakes/kilauea/data/all_explode_M4.csv&#39;</span><span class="p">)</span>
+<span class="n">explode</span><span class="o">.</span><span class="n">head</span><span class="p">()</span></code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>DTtime</th>
+      <th>depth</th>
+      <th>mag</th>
+      <th>magType</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2018-05-17 04:15:30.350</td>
+      <td>0.01</td>
+      <td>5.0</td>
+      <td>mw</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2018-05-17 14:04:10.700</td>
+      <td>0.01</td>
+      <td>5.0</td>
+      <td>mw</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2018-05-19 09:58:33.210</td>
+      <td>0.01</td>
+      <td>5.1</td>
+      <td>mw</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2018-05-20 01:58:13.320</td>
+      <td>0.01</td>
+      <td>4.9</td>
+      <td>mw</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2018-05-20 21:50:07.310</td>
+      <td>0.01</td>
+      <td>4.9</td>
+      <td>mw</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h4 id="converting-to-a-datetime-object">Converting to a datetime object</h4>
+
+<p>The &ldquo;DTtime&rdquo; column is not currently in a datetime format; plotting will be easier if we convert the column to a <code>numpy.datetime64</code> object.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Convert &#34;DTtime&#34; to a datetime object</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s2">&#34;Time column format: &#34;</span><span class="p">,</span> <span class="n">events</span><span class="p">[</span><span class="s1">&#39;DTtime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+<span class="n">events</span><span class="p">[</span><span class="s1">&#39;DTtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">events</span><span class="p">[</span><span class="s1">&#39;DTtime&#39;</span><span class="p">])</span>
+<span class="n">explode</span><span class="p">[</span><span class="s1">&#39;DTtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">explode</span><span class="p">[</span><span class="s1">&#39;DTtime&#39;</span><span class="p">])</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&#34;Time column format (converted): &#34;</span><span class="p">,</span> <span class="n">events</span><span class="p">[</span><span class="s1">&#39;DTtime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></code></pre></div>
+<pre><code>Time column format:  object
+Time column format (converted):  datetime64[ns]
+</code></pre>
+
+<h3 id="make-the-plot">Make the plot!</h3>
+
+<p>We are ready to make our Bokeh plot. The earthquake will be plotted as circles, with time on the x-axis and earthquake magnitude on the y-axis. To better mark the time of the explosive event, they will be plotted as vertical lines with a height equal to the magnitude.</p>
+
+<p>To display inline a Jupyter notebook (which I am using), we use the <code>output_notebook()</code> function.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Display plot in the notebook</span>
+<span class="n">output_notebook</span><span class="p">()</span></code></pre></div>
+<div class="bk-root">
+    <a href="https://bokeh.pydata.org" target="_blank" class="bk-logo bk-logo-small bk-logo-notebook"></a>
+    <span id="1001">Loading BokehJS ...</span>
+</div>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Make vertical line coordinates for each explosion</span>
+
+<span class="c1"># x0, x1 = time of explosion</span>
+<span class="c1"># y0 = 1.5, y1 = magnitude of explosion</span>
+
+<span class="n">ex_time</span> <span class="o">=</span> <span class="n">explode</span><span class="p">[</span><span class="s1">&#39;DTtime&#39;</span><span class="p">]</span>
+<span class="n">ystart</span><span class="o">=</span> <span class="p">[</span><span class="mf">1.8</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">ex_time</span><span class="p">)</span>
+<span class="n">yend</span> <span class="o">=</span> <span class="n">explode</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">]</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Make the plot</span>
+<span class="n">output_file</span><span class="p">(</span><span class="s1">&#39;kilauea2018_cycles.html&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Kilauea Summit Earthquakes&#39;</span><span class="p">)</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span><span class="n">plot_width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">plot_height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
+           <span class="n">x_axis_type</span><span class="o">=</span><span class="s1">&#39;datetime&#39;</span><span class="p">,</span>
+           <span class="n">x_axis_label</span> <span class="o">=</span> <span class="s1">&#39;Date&#39;</span><span class="p">,</span>
+           <span class="n">y_axis_label</span> <span class="o">=</span> <span class="s1">&#39;Magnitude&#39;</span><span class="p">,</span>
+           <span class="n">y_range</span> <span class="o">=</span> <span class="n">Range1d</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+           <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Kilauea summit earthquakes&#39;</span><span class="p">)</span>
+
+<span class="n">p</span><span class="o">.</span><span class="n">segment</span><span class="p">(</span><span class="n">x0</span><span class="o">=</span><span class="n">ex_time</span><span class="p">,</span><span class="n">y0</span><span class="o">=</span><span class="n">ystart</span><span class="p">,</span><span class="n">x1</span><span class="o">=</span><span class="n">ex_time</span><span class="p">,</span><span class="n">y1</span><span class="o">=</span><span class="n">yend</span><span class="p">,</span>
+         <span class="n">line_width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+<span class="n">p</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">events</span><span class="p">[</span><span class="s1">&#39;DTtime&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">events</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">],</span>
+         <span class="n">size</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;darkblue&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+        <span class="n">legend</span><span class="o">=</span><span class="s1">&#39;earthquakes (Ml or Md)&#39;</span><span class="p">)</span>
+
+<span class="n">p</span><span class="o">.</span><span class="n">asterisk</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">explode</span><span class="p">[</span><span class="s1">&#39;DTtime&#39;</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">explode</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">],</span>
+          <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+          <span class="n">legend</span><span class="o">=</span><span class="s1">&#39;summit collapse event (Mw equivalent)&#39;</span><span class="p">)</span>
+
+<span class="n">p</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s2">&#34;top_left&#34;</span>
+<span class="n">p</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="s2">&#34;horizontal&#34;</span>
+<span class="n">p</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">background_fill_alpha</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># To view the plot inline, uncomment the following line</span>
+<span class="c1">#show(p)</span></code></pre></div>
+<p>In order to be able to interact with the figure we created above, we need to save the html of the file and then place that code in the static directory of the hugo site. I created a directory for my Bokeh plots and subdirectories for different topics.</p>
+
+<p>First, import the necessary methods from the Bokeh library and create the html for the plot. Then write out the html to a file, close the file, and move it into the appropriate directory. When the Hugo site is built, finding the image will be as easy as clicking on the link below.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">bokeh.embed</span> <span class="kn">import</span> <span class="n">file_html</span>
+<span class="kn">from</span> <span class="nn">bokeh.resources</span> <span class="kn">import</span> <span class="n">CDN</span>
+
+<span class="n">html</span> <span class="o">=</span> <span class="n">file_html</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">CDN</span><span class="p">,</span> <span class="s2">&#34;my plot&#34;</span><span class="p">)</span>
+
+<span class="n">kilauea2018</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s2">&#34;kilauea2018.html&#34;</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s2">&#34;w&#34;</span><span class="p">,</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&#34;utf-8&#34;</span><span class="p">)</span>
+<span class="n">kilauea2018</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+<span class="n">kilauea2018</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></code></pre></div>
+<h4 id="interactive-plot">Interactive plot!</h4>
+
+<p>Check out the interactive image <a href="localhost:1313/bokeh/kilauea2018/kilauea2018.html" target="_blank">here:</a></p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Earthquake Statistics - Frequency and Magnitude</title>
+            <link>https://nicolew.xyz/posts/2018/04/earthquake-statistics---frequency-and-magnitude/</link>
+            <pubDate>Sat, 14 Apr 2018 00:00:00 +0000</pubDate>
+            
+            <guid>https://nicolew.xyz/posts/2018/04/earthquake-statistics---frequency-and-magnitude/</guid>
+            <description>In a previous blog post, I looked at the number of earthquakes greater than magnitude 6 that occurred globally between 1983 and 2017, and how these events were distributed over different time intervals. While it is useful to look at general seismicity rates over certain time periods, it is also important to understand how the magnitudes of earthquakes are distributed. In other words, how frequently do big events happen compared to small ones?</description>
+            <content type="html"><![CDATA[
+
+<p>In a <a href="https://www.nicolew.xyz/blog/2018/03/19/earthquake-statistics-when-and-how-many/" target="_blank">previous blog post</a>, I looked at the number of earthquakes greater than magnitude 6 that occurred globally between 1983 and 2017, and how these events were distributed over different time intervals. While it is useful to look at general seismicity rates over certain time periods, it is also important to understand how the magnitudes of earthquakes are distributed. In other words, how frequently do big events happen compared to small ones?</p>
+
+<p>The data used for this post is described in more detail in the blog post linked above and was obtained from the <a href="https://earthquake.usgs.gov/earthquakes/search/" target="_blank">USGS Earthquake catalogue</a>. Let&rsquo;s load in the data and get started.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Load in the csv file of earthquakes M6 and greater</span>
+<span class="c1"># globally from 1 January, 1970 (source: USGS)</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;/home/nicole/seismology/stats/eq_1970_M6.csv&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Total number of earthquakes:&#39;</span><span class="p">,</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span></code></pre></div>
+<pre><code>Total number of earthquakes: 6714
+</code></pre>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th></th>
+      <th>time</th>
+      <th>latitude</th>
+      <th>longitude</th>
+      <th>depth</th>
+      <th>mag</th>
+      <th>magType</th>
+      <th>place</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2017-12-15T16:47:58.230Z</td>
+      <td>-7.4921</td>
+      <td>108.1743</td>
+      <td>90.0</td>
+      <td>6.5</td>
+      <td>mww</td>
+      <td>1km E of Kampungbaru, Indonesia</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2017-12-13T18:03:43.920Z</td>
+      <td>-54.2189</td>
+      <td>2.1628</td>
+      <td>17.0</td>
+      <td>6.5</td>
+      <td>mww</td>
+      <td>80km WNW of Bouvet Island, Bouvet Island</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2017-12-12T21:41:31.140Z</td>
+      <td>30.8275</td>
+      <td>57.2982</td>
+      <td>8.0</td>
+      <td>6.0</td>
+      <td>mww</td>
+      <td>63km NNE of Kerman, Iran</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2017-12-12T08:43:18.320Z</td>
+      <td>30.7372</td>
+      <td>57.2795</td>
+      <td>12.0</td>
+      <td>6.0</td>
+      <td>mww</td>
+      <td>53km NNE of Kerman, Iran</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2017-12-09T15:14:24.770Z</td>
+      <td>10.0928</td>
+      <td>140.2016</td>
+      <td>10.0</td>
+      <td>6.1</td>
+      <td>mww</td>
+      <td>50km NW of Fais, Micronesia</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>This data set includes a total of 6714 events that are magnitude 6 and above from 1970 through the end of 2017. The information for each event includes the date and time, coordinates, depth (in km), magnitude, magnitude type, and place name. This analysis will focus on how many earthquakes occur at each magnitude.</p>
+
+<h3 id="earthquake-magnitudes">Earthquake magnitudes</h3>
+
+<p>We can see that each event has a magnitude and magnitude type. Let&rsquo;s take a brief detour into seismology and review what an earthquake magnitude measures and the magnitude types used most often by seismologists.</p>
+
+<p>The size of an earthquake can be represented in a number of ways, but the most common metric is to use the earthquake <em>magnitude</em>. An earthquake magnitude is determined by measuring the maximum amplitude of the recorded seismic waves on a seismogram (record of ground motion). All earthquake magnitude scales are logarithmic, with an increase of one magnitude corresponding to an increase in the recorded amplitude by a factor of ten. For example, a M 8 event would have a recorded amplitude 100 times greater than a M 6 event, on the same magnitude scale.</p>
+
+<p>Because earthquakes large and small are recorded over a range of distances with instruments that have different responses to ground motion, there is a need for different magnitude scales. You can find a review of these magnitude scales <a href="https://earthquake.usgs.gov/earthquakes/eventpage/terms.php" target="_blank">here</a>, so I won&rsquo;t go into a lot of detail.</p>
+
+<h4 id="moment-magnitude">Moment magnitude</h4>
+
+<p>A newer magnitude scale that worked better for larger events was developed in the late 1970s and was calibrated to agree with other scales in use at the time. This scale is based on the moment of an earthquake, which is based on physical properties of the fault rupture that generates the earthquake. The moment magnitude scale is denoted by an Mw (also Mww, Mwc, Mwr, Mwb). A large percentage of earthquakes Mw &gt; 5 are recorded using the moment magnitude scale.</p>
+
+<p>Before we look at the number of earthquakes at different magnitudes, let&rsquo;s first take a look at the magnitude types that are present in our data set. We can also use this as an opportunity to make a stacked bar chart. Because, like bow ties, stacked bar charts are cool.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># List the magnitude types</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;magType&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span></code></pre></div>
+<pre><code>mw     2128
+mwc    1602
+mww     957
+mwb     919
+ms      708
+mb      379
+ml       14
+mh        3
+mwr       2
+md        2
+Name: magType, dtype: int64
+</code></pre>
+
+<p>We have ten different magnitude types but only six of them are used frequently; let&rsquo;s use just the top six in the bar chart plot.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Create an array of the top magnitudes to keep</span>
+<span class="c1"># (will be used for plotting later)</span>
+<span class="n">mag_keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;magType&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+<span class="c1"># Change the type from &#39;object&#39; to &#39;string&#39;</span>
+<span class="n">mag_keep</span> <span class="o">=</span> <span class="n">mag_keep</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span></code></pre></div>
+<h3 id="plotting-magnitude-types">Plotting magnitude types</h3>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Import stuff for plotting</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+
+<span class="c1"># Seaborn for plotting and styling</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="kn">as</span> <span class="nn">sns</span>
+
+<span class="c1"># Settings for all figures</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.labelsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.titlesize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">18</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;legend.fontsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">14</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Count the number of earthquakes for each year</span>
+
+<span class="c1"># Import the datetime module</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="c1"># Create a datetime object column from</span>
+<span class="c1"># the string time column using strptime</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;dt_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S.</span><span class="si">%f</span><span class="s1">Z&#39;</span><span class="p">))</span>
+
+<span class="c1"># Add an additional column for the year</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dt_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+
+<span class="c1"># Groupby year, then get counts for magnitude type</span>
+<span class="n">df_cut</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;year&#39;</span><span class="p">,</span> <span class="s1">&#39;magType&#39;</span><span class="p">]]</span>
+<span class="n">df_magType</span> <span class="o">=</span> <span class="n">df_cut</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;year&#39;</span><span class="p">)[</span><span class="s1">&#39;magType&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span>
+
+<span class="c1"># Keep only the top 6 magnitude types for plotting</span>
+<span class="n">df_magType</span> <span class="o">=</span> <span class="n">df_magType</span><span class="p">[</span><span class="n">mag_keep</span><span class="p">]</span>
+
+<span class="c1"># Plot the dataFrame as a stacked bar chart</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">df_magType</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> 
+                     <span class="n">colormap</span><span class="o">=</span><span class="s1">&#39;magma_r&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">250</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper center&#39;</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Year&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Number of earthquakes&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Magnitude type distribution from 1970–2017&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></div>
+<p><img src="/images/eq_stats2/output_9_0.png" alt="png" /></p>
+
+<p>From the chart, we can see that the moment magnitude scale was used consistently after about 1983. I don&rsquo;t know why there seems to be a switch back to <em>ms</em> and <em>mb</em> magnitudes from 1973 to about 1982. Possibly as a result of this switch, it looks like there might be missing events between 1973 and 1983. The <em>ms</em> and <em>mb</em> magnitude scales will generally give a lower magnitude compared to the moment magnitude scale, for the same event. Between 1973 and 1982, there may have been more events of <em>M</em> 6 and above if they had been recorded with the moment magnitude scale. Since there seems to be missing events for those years and the moment magnitude scale is not used consistently, we will cut out all events from before 1983.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Cut out years 1970 - 1982</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">year</span> <span class="o">&gt;</span> <span class="mi">1982</span><span class="p">]</span>
+
+<span class="c1"># Print the minimum year in the column</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&#34;Earliest year of data:&#34;</span><span class="p">,</span><span class="nb">min</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]))</span>
+
+<span class="c1"># Total number of earthquakes</span>
+<span class="n">N_tot</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Total number of earthquakes:&#39;</span><span class="p">,</span> <span class="n">N_tot</span><span class="p">)</span></code></pre></div>
+<pre><code>Earliest year of data: 1983
+Total number of earthquakes: 5328
+</code></pre>
+
+<h3 id="earthquake-magnitude">Earthquake Magnitude</h3>
+
+<p>Earthquakes occur over a range of magnitudes, from very small ones of magnitude 1 (and even lower) to the largest events on Earth with magnitudes over 9. The largest earthquake in recorded history was the Mw 9.5 1960 <a href="https://en.wikipedia.org/wiki/1960_Valdivia_earthquake" target="_blank">Valdivia earthquake</a>. This event is thought to be an example of the maximum size of an earthquake; there are no areas on Earth with larger possible rupture areas or the ability to accumulate enough stress.</p>
+
+<h4 id="earthquake-magnitude-distribution">Earthquake magnitude distribution</h4>
+
+<p>The amount of energy released during an earthquake is proportional to the magnitude. For the moment magnitude scale, an increase of one magnitude corresponds to an energy increase by a factor of ~32. We know from observation that there are more smaller earthquakes than larger ones. Fortunately, the big damaging events don&rsquo;t happen frequently. Using our catalogue data, let&rsquo;s look at this empirically.</p>
+
+<p>Counting the number of events for each magnitude between 6.0 and 9.1 (in tenths) we can visualize the distribution of frequency with magnitude. Not all magnitudes are represented so we&rsquo;ll fill in a value of zero for those indices (magnitudes).</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Number of earthquakes by magnitude</span>
+<span class="n">mag_tot</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">mag_tot</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># Convert the indices of the Series to an np.ndarray</span>
+<span class="n">mags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mag_tot</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+<span class="c1"># Construct an array of the magnitudes </span>
+<span class="c1"># between 6.0 and 9.1 (step=0.1)</span>
+<span class="n">mags_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">6.0</span><span class="p">,</span><span class="mf">9.1</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+
+<span class="c1"># Compare to find at what magnitudes earthquakes didn&#39;t occur </span>
+<span class="c1"># (find the set difference between the two arrays)</span>
+<span class="n">mags_miss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">setxor1d</span><span class="p">(</span><span class="n">mags_all</span><span class="p">,</span><span class="n">mags</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Magnitudes with no earthquakes:&#39;</span><span class="p">,</span> <span class="n">mags_miss</span><span class="p">)</span>
+
+<span class="c1"># Add values for missing magnitudes</span>
+<span class="n">mag_add</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mags_miss</span><span class="p">)),</span> <span class="n">index</span> <span class="o">=</span> <span class="n">mags_miss</span><span class="p">)</span>
+<span class="n">mag_tot</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">mag_tot</span><span class="p">,</span> <span class="n">mag_add</span><span class="p">])</span>
+<span class="n">mag_tot</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></code></pre></div>
+<pre><code>Magnitudes with no earthquakes: [ 8.5  8.7  8.9  9. ]
+</code></pre>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plot with all indices</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">mag_tot</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">mag_tot</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Magnitude&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Number of Earthquakes&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></div>
+<p><img src="/images/eq_stats2/output_14_0.png" alt="png" /></p>
+
+<h3 id="gutenberg-ndash-richter-law">Gutenberg&ndash;Richter law</h3>
+
+<p>Okay, so this is a nice power-law distribution. But, is this what is expected for earthquakes? Power-law distributions are ubiquitous in nature, from scaling in numerous biological system to the inverse-square laws of the gravitational and electrostatic forces. It shouldn&rsquo;t be a surprise that earthquake energy release also follows a power-law distribution.</p>
+
+<p>In seismology, the relationship between the frequency of earthquake occurrence and the magnitudes of those events is known as the <a href="https://en.wikipedia.org/wiki/Gutenberg%E2%80%93Richter_law" target="_blank">Gutenberg&ndash;Richter law</a>. In a <a href="http://resolver.caltech.edu/CaltechAUTHORS:20140731-150249818" target="_blank">paper published in 1956</a> by B. Gutenberg and C.F. Richter, the frequency of earthquake magnitudes was shown to follow a power-law scale. The paper focused on earthquakes in southern California but also included larger events worldwide.</p>
+
+<p>The Gutenberg&ndash;Richter law is stated as</p>
+
+<p>$log_{10} N = a-bM$</p>
+
+<p>where $N$ is the cumulative number of earthquakes greater than magnitude $M$ and $a$ and $b$ are constants. The value for $a$ is determined by the total number of events, where $N_{tot} = 10^a$. The value of $b$ is a statistical measure of the ratio of small earthquakes to large earthquakes; if $b$ is large, small earthquakes are relatively more common and if $b$ is small, large earthquakes are more common. For earthquakes worldwide, $b$=1 because we are looking at the whole Earth and not a specific geologic setting or small catalogue.</p>
+
+<p>Using the Gutenberg&ndash;Richter law, we&rsquo;ll plot it along with the earthquake occurrence values plotted in the chart above. Because the G&ndash;R law is the cumulative number of events above a given magnitude, we first need to calculate a running total.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Calculate the reverse running total </span>
+<span class="c1">#(i.e. all events above M6, then all above M6.1, etc.)</span>
+<span class="n">mag_Ntot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">mag_tot</span><span class="o">.</span><span class="n">values</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Plot Gutenberg-Richter relationship: N = 10**(a-bM)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">6</span>
+<span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">9.1</span><span class="p">)</span>
+<span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="n">M</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">mag_tot</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">mag_Ntot</span><span class="o">/</span><span class="n">N_tot</span><span class="p">,</span> 
+              <span class="n">width</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+              <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Cumulative earthquakes 1983–2017&#39;</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+         <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Gutenberg–Richter equation&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Cumulative earthquakes / total number&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Magnitude&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></div>
+<p><img src="/images/eq_stats2/output_16_0.png" alt="png" /></p>
+
+<h3 id="don-t-worry-b-happy">Don&rsquo;t Worry, b Happy</h3>
+
+<p>Using a value of $b$=1 gives an excellent fit to this data set, as expected for a catalogue of global earthquake events over many years. The <em>b</em> value for this data set doesn&rsquo;t really tell us anything new, but for catalogues with different spatial or geographic characteristics, the b value can provide more valuable information. For example, if the fit drops off for small magnitudes, this can indicate that the catalogue is missing smaller events and is not complete.</p>
+
+<h3 id="summary">Summary</h3>
+
+<p>This purpose of this post was to explore the basics of the relationship between the frequency and magnitude of earthquakes occurring globally over a large time space. This was also a space for me to explore working with data frames and pandas and attempting to make useful plots.</p>
+
+<p>The data set used in this analysis is available <a href="https://github.com/nwhoffman/earthquake_stats/blob/master/eq_1970_M6.csv" target="_blank">here</a> and the Jupyter notebook is <a href="https://github.com/nwhoffman/earthquake_stats/eq_stats2.ipynb" target="_blank">here</a>.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Earthquake Statistics  - When and How Many</title>
+            <link>https://nicolew.xyz/posts/2018/03/earthquake-statistics----when-and-how-many/</link>
+            <pubDate>Mon, 19 Mar 2018 00:00:00 +0000</pubDate>
+            
+            <guid>https://nicolew.xyz/posts/2018/03/earthquake-statistics----when-and-how-many/</guid>
+            <description>Hundreds of earthquakes happen everyday, all over the Earth. The majority of these events are not felt by people and rarely cause any damage. But, the shaking of the ground doesn&amp;rsquo;t go unnoticed. Earthquakes large and small are detected by number of instruments, including global and local arrays of seismographs recording in locations ranging from the tops of mountains to the bottom of the ocean.
+Understanding when and where earthquakes occur is important for identifying locations where there is an increased risk from damaging earthquakes.</description>
+            <content type="html"><![CDATA[
+
+<p>Hundreds of earthquakes happen everyday, all over the Earth. The majority of these events are not felt by people and rarely cause any damage. But, the shaking of the ground doesn&rsquo;t go unnoticed. Earthquakes large and small are detected by number of instruments, including global and local arrays of seismographs recording in locations ranging from the tops of mountains to the bottom of the ocean.</p>
+
+<p>Understanding when and where earthquakes occur is important for identifying locations where there is an increased risk from damaging earthquakes. Toward that effort, there have been various attempts to predict earthquakes, with limited sucess. We know that there are certain regions where damaging eartquakes occur more frequently, namely plate boundaries and especially convergent margins. While we might have a good idea of &ldquo;where&rdquo;, it&rsquo;s a lot more complicated to determine &ldquo;when&rdquo;.</p>
+
+<p>Even if there aren&rsquo;t any obvious patterns when looking at the global occurrence of larger earthquakes, it is still interesting to explore the general statistics &ndash; how many events occur each day, what are the year-to-year variations, are there any anomalous months or days, etc. We won&rsquo;t know what&rsquo;s in the data until we look. Fortunately, there is an abundance of earthquake data available from a variety of sources.</p>
+
+<h3 id="earthquake-data">Earthquake data</h3>
+
+<p>With global coverage using relatively sensitive instruments, it is possible to detect all events greater than about a magnitude 6 worldwide (more on <a href="https://earthquake.usgs.gov/learn/topics/measure.php" target="_blank">earthquake magnitude scales</a>). Smaller events can be recorded by local networks and stations close to the event, but there are many small earthquakes that are too remote to be detected. For this analysis, I selected a lower magnitude limit of magnitude 6 so that my data set would have a complete record of all earthquakes at M6 and above.</p>
+
+<p>The vast majority of the bigger earthquakes are now detected by the <a href="https://www.iris.edu/hq/programs/gsn" target="_blank">The Global Seismographic Network (GSN)</a> which was formed in 1986. Prior to that, there were stations recording for many years as part of different networks or individually. I somewhat arbitrarily chose to begin with 1970 since nuclear testing at the time would have necessitated monitoring for the seismic signals generated by the tests.</p>
+
+<p>Using data from 1970 to the end of 2017, let&rsquo;s take a look at all of the earthquakes greater than M6. The data is from the <a href="https://earthquake.usgs.gov/earthquakes/search/" target="_blank">USGS earthquake catalog</a> with search parameters of M6 and greater worldwide, for the years 1970 to 2017.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Load in the csv file of earthquakes M6 and greater </span>
+<span class="c1"># from 1 January, 1970 (source: USGS)</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;/home/nicole/seismology/stats/eq_1970_M6.csv&#39;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span></code></pre></div>
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th></th>
+      <th>time</th>
+      <th>latitude</th>
+      <th>longitude</th>
+      <th>depth</th>
+      <th>mag</th>
+      <th>magType</th>
+      <th>place</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2017-12-15T16:47:58.230Z</td>
+      <td>-7.4921</td>
+      <td>108.1743</td>
+      <td>90.0</td>
+      <td>6.5</td>
+      <td>mww</td>
+      <td>1km E of Kampungbaru, Indonesia</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2017-12-13T18:03:43.920Z</td>
+      <td>-54.2189</td>
+      <td>2.1628</td>
+      <td>17.0</td>
+      <td>6.5</td>
+      <td>mww</td>
+      <td>80km WNW of Bouvet Island, Bouvet Island</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2017-12-12T21:41:31.140Z</td>
+      <td>30.8275</td>
+      <td>57.2982</td>
+      <td>8.0</td>
+      <td>6.0</td>
+      <td>mww</td>
+      <td>63km NNE of Kerman, Iran</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2017-12-12T08:43:18.320Z</td>
+      <td>30.7372</td>
+      <td>57.2795</td>
+      <td>12.0</td>
+      <td>6.0</td>
+      <td>mww</td>
+      <td>53km NNE of Kerman, Iran</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2017-12-09T15:14:24.770Z</td>
+      <td>10.0928</td>
+      <td>140.2016</td>
+      <td>10.0</td>
+      <td>6.1</td>
+      <td>mww</td>
+      <td>50km NW of Fais, Micronesia</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Before importing, the file was edited to remove the extra columns that weren&rsquo;t needed for this particular analysis (e.g. network ID, errors in location and depth, number of stations). The event type can be specified to include only earthquakes, which then excludes nuclear explosions that were above M6 between 1970 and 2017.</p>
+
+<p>The minimum magnitude for this dataset is M6 but what about the total number of events and the largest earthquakes?</p>
+
+<h3 id="general-statistics">General statistics</h3>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Total number of earthquakes</span>
+<span class="n">N_tot</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Total number of earthquakes:&#39;</span><span class="p">,</span> <span class="n">N_tot</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Average number per week:&#39;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">N_tot</span><span class="o">/</span><span class="p">(</span><span class="mi">52</span><span class="o">*</span><span class="p">(</span><span class="mi">2017</span><span class="o">-</span><span class="mi">1970</span><span class="o">+</span><span class="mi">1</span><span class="p">)),</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="c1"># Largest magnitude</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Largest magnitude earthquakes:&#39;</span><span class="p">)</span>
+<span class="n">df</span><span class="p">[[</span><span class="s1">&#39;mag&#39;</span><span class="p">,</span><span class="s1">&#39;time&#39;</span><span class="p">,</span><span class="s1">&#39;place&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;mag&#39;</span><span class="p">,</span><span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span></code></pre></div>
+<pre><code>Total number of earthquakes: 6714
+Average number per week: 2.69
+Largest magnitude earthquakes:
+</code></pre>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th></th>
+      <th>mag</th>
+      <th>time</th>
+      <th>place</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1001</th>
+      <td>9.1</td>
+      <td>2011-03-11T05:46:24.120Z</td>
+      <td>near the east coast of Honshu, Japan</td>
+    </tr>
+    <tr>
+      <th>2069</th>
+      <td>9.1</td>
+      <td>2004-12-26T00:58:53.450Z</td>
+      <td>off the west coast of northern Sumatra</td>
+    </tr>
+    <tr>
+      <th>1192</th>
+      <td>8.8</td>
+      <td>2010-02-27T06:34:11.530Z</td>
+      <td>offshore Bio-Bio, Chile</td>
+    </tr>
+    <tr>
+      <th>797</th>
+      <td>8.6</td>
+      <td>2012-04-11T08:38:36.720Z</td>
+      <td>off the west coast of northern Sumatra</td>
+    </tr>
+    <tr>
+      <th>2002</th>
+      <td>8.6</td>
+      <td>2005-03-28T16:09:36.530Z</td>
+      <td>northern Sumatra, Indonesia</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Since 1970, there has been an average of almost three earthquakes each week with a magnitude M6 and greater. The largest earthquakes have all been relatively recent, between 2004 and 2012. As expected, these events occur at subducting plate boundaries and the five largest events are on the <a href="https://en.wikipedia.org/wiki/Ring_of_Fire" target="_blank">Ring of Fire</a>.</p>
+
+<p>Separating the earthquakes into various time intervals, we can see if there are any patterns or other interesting features when looking at when earthquakes happen.</p>
+
+<h3 id="earthquakes-year-month-and-day">Earthquakes: year, month, and day</h3>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Count the number of earthquakes over various time intervals</span>
+
+<span class="c1"># Import the datetime module</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="c1"># Create a datetime object column from the </span>
+<span class="c1">#string time column using strptime</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;dt_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> 
+                                 <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S.</span><span class="si">%f</span><span class="s1">Z&#39;</span><span class="p">))</span>
+
+<span class="c1"># Add additional columns for day-of-year, year, month, and day</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;dofy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dt_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&#34;%j&#34;</span><span class="p">))</span>
+<span class="c1"># Cast the dtype as int (currently an object)</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;dofy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dofy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dt_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">year</span><span class="p">)</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dt_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">month</span><span class="p">)</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;day&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dt_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+
+<span class="c1"># Find the number of earthquakes for each day, year, month, and day of the month. </span>
+<span class="n">dofy_tot</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dofy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">dofy_tot</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">year_tot</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">month_tot</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">day_tot</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;day&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># Find the average number of events per year, day of year, and month</span>
+<span class="n">year_ave</span> <span class="o">=</span> <span class="n">year_tot</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">dofy_ave</span> <span class="o">=</span> <span class="n">dofy_tot</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">month_ave</span> <span class="o">=</span> <span class="n">month_tot</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span></code></pre></div>
+<h3 id="plotting-time">Plotting time!</h3>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Import stuff for plotting</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+
+<span class="c1"># Seaborn for plotting and styling</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="kn">as</span> <span class="nn">sns</span>
+
+<span class="c1"># Settings for all figures</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.labelsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;axes.titlesize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">18</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;legend.fontsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">14</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plot earthquake occurrence as a function of year</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+<span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">year_tot</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">year_tot</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">year_ave</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-.&#39;</span><span class="p">,</span> 
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;average&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Year&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Number of earthquakes&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></div>
+<p><img src="/images/eq_stats1/output_10_0.png" alt="png" /></p>
+
+<p>With the exception of the years 1973 through 1982, the number of earthquakes each year is pretty close to the average. I don&rsquo;t know why there are fewer events recorded for about 10 years, but it is probably associated with nuclear test monitoring and maybe funding problems that reduced the number of recording stations in the 70s; that is just a guess. On the other side, years with large earthquakes (e.g. 2011) will have a greater number of total events and will be above the average. To make the rest of the analysis more consistent, we&rsquo;ll just start with data beginning in 1983.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Cut out years 1970 - 1982</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">year</span> <span class="o">&gt;</span> <span class="mi">1982</span><span class="p">]</span>
+
+<span class="c1"># Print the minimum year in the column</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&#34;Earliest year of data:&#34;</span><span class="p">,</span><span class="nb">min</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]))</span></code></pre></div>
+<pre><code>Earliest year of data: 1983
+</code></pre>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plot earthquake occurrence as a function of the day of the year</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dofy_tot</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dofy_tot</span><span class="o">.</span><span class="n">values</span> <span class="p">,</span><span class="s1">&#39;bo&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">dofy_ave</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-.&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Number of earthquakes&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Day of year&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Worldwide Earthquakes M6 and Greater (1983-2017)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></div>
+<p><img src="/images/eq_stats1/output_13_0.png" alt="png" /></p>
+
+<p>With a few exceptions, the number of earthquakes on any given day of the year is consistent. The dates that stand out are probably when some of the largest events occurred, since the biggest earthquakes are almost always followed by numerous aftershocks, many of which would be larger than M6. To find those events, we&rsquo;ll look at the day of the year with the greatest number of events.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Find the day of year with the greatest number of events</span>
+<span class="n">dofy_max</span> <span class="o">=</span> <span class="n">dofy_tot</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># Print out the events that occur on those days of the year, </span>
+<span class="c1"># sorted by decreasing magnitude</span>
+<span class="n">df_max</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">dofy</span> <span class="o">==</span> <span class="n">dofy_max</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;mag&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="n">df_max</span><span class="p">[[</span><span class="s1">&#39;place&#39;</span><span class="p">,</span><span class="s1">&#39;dt_time&#39;</span><span class="p">,</span><span class="s1">&#39;dofy&#39;</span><span class="p">,</span><span class="s1">&#39;year&#39;</span><span class="p">,</span><span class="s1">&#39;mag&#39;</span><span class="p">]]</span></code></pre></div>
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th></th>
+      <th>place</th>
+      <th>dt_time</th>
+      <th>dofy</th>
+      <th>year</th>
+      <th>mag</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1001</th>
+      <td>near the east coast of Honshu, Japan</td>
+      <td>2011-03-11 05:46:24.120</td>
+      <td>70</td>
+      <td>2011</td>
+      <td>9.1</td>
+    </tr>
+    <tr>
+      <th>990</th>
+      <td>near the east coast of Honshu, Japan</td>
+      <td>2011-03-11 06:15:40.280</td>
+      <td>70</td>
+      <td>2011</td>
+      <td>7.9</td>
+    </tr>
+    <tr>
+      <th>985</th>
+      <td>off the east coast of Honshu, Japan</td>
+      <td>2011-03-11 06:25:50.300</td>
+      <td>70</td>
+      <td>2011</td>
+      <td>7.7</td>
+    </tr>
+    <tr>
+      <th>1166</th>
+      <td>Libertador General Bernardo O'Higgins, Chile</td>
+      <td>2010-03-11 14:55:27.510</td>
+      <td>70</td>
+      <td>2010</td>
+      <td>7.0</td>
+    </tr>
+    <tr>
+      <th>3176</th>
+      <td>Philippine Islands region</td>
+      <td>1997-03-11 19:22:00.130</td>
+      <td>70</td>
+      <td>1997</td>
+      <td>6.9</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>The <a href="https://earthquake.usgs.gov/earthquakes/eventpage/official20110311054624120_30#executive" target="_blank">Tohoku-oki megathrust earthquake</a> occurred on March 11, 2011. With a magnitude of 9.1, there were hundreds of aftershocks with many of them above a magnitude 6.</p>
+
+<p>What about the number of earthquakes for a given month? Grouping the events by month, maybe we can demonstrate that there isn&rsquo;t an &ldquo;earthquake month&rdquo; or a particular season in which earthquakes occur.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plot earthquake occurrence as a function of the month </span>
+<span class="c1"># (normalizing by the number of days in the month)</span>
+
+<span class="c1"># Array of month lengths</span>
+<span class="n">month_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">31</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">31</span><span class="p">])</span>
+<span class="c1"># Sort by month index</span>
+<span class="n">month_sort</span> <span class="o">=</span> <span class="n">month_tot</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+<span class="c1"># Normalize by the length of the month</span>
+<span class="n">month_norm</span> <span class="o">=</span> <span class="n">month_sort</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="p">(</span><span class="n">month_length</span><span class="o">*</span><span class="p">(</span><span class="mi">2017</span><span class="o">-</span><span class="mi">1983</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="c1"># Plot (including daily average and the deviation)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">month_sort</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">month_norm</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">month_norm</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-.&#39;</span><span class="p">,</span> 
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhspan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">month_norm</span><span class="p">)</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">month_norm</span><span class="p">),</span> 
+            <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">month_norm</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">month_norm</span><span class="p">),</span> 
+            <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;std&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Number of earthquakes per day&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Month&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Worldwide Earthquakes M6 and Greater (1983-2017)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></div>
+<p><img src="/images/eq_stats1/output_17_0.png" alt="png" /></p>
+
+<p>Well, there is maybe a little bit of a trend here, with a &ldquo;peak&rdquo; in April and &ldquo;troughs&rdquo; in January and July. It would be helpful to look at the number of events each month for individual years; a heatmap will be a great way to visualize this. Time to group some data!</p>
+
+<h3 id="grouping-events-for-each-year">Grouping events for each year</h3>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Group the DataFrame: earthquake counts for each year (rows) by month (columns) </span>
+
+<span class="c1"># Group the entire dataframe by year and month, </span>
+<span class="c1"># find the number of earthquakes in each year and month,</span>
+<span class="c1"># then unstack to remove the hierarchical indexing</span>
+<span class="c1"># (pivot the &#39;month&#39; level to return a DataFrame with new columns).</span>
+<span class="n">df_newcol</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;year&#39;</span><span class="p">,</span><span class="s1">&#39;month&#39;</span><span class="p">])[</span><span class="s1">&#39;day&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">unstack</span><span class="p">()</span>
+
+<span class="c1"># Divide each row by the month length array to return</span>
+<span class="c1"># the number of earthquakes per day for each month </span>
+<span class="n">df_newcol</span> <span class="o">=</span> <span class="n">df_newcol</span> <span class="o">/</span> <span class="n">month_length</span> 
+<span class="n">df_newcol</span><span class="o">.</span><span class="nb">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span></code></pre></div>
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th>month</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>6</th>
+      <th>7</th>
+      <th>8</th>
+      <th>9</th>
+      <th>10</th>
+      <th>11</th>
+      <th>12</th>
+    </tr>
+    <tr>
+      <th>year</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2013</th>
+      <td>0.23</td>
+      <td>0.82</td>
+      <td>0.16</td>
+      <td>0.53</td>
+      <td>0.42</td>
+      <td>0.27</td>
+      <td>0.35</td>
+      <td>0.35</td>
+      <td>0.53</td>
+      <td>0.52</td>
+      <td>0.40</td>
+      <td>0.13</td>
+    </tr>
+    <tr>
+      <th>2014</th>
+      <td>0.19</td>
+      <td>0.29</td>
+      <td>0.55</td>
+      <td>0.87</td>
+      <td>0.58</td>
+      <td>0.53</td>
+      <td>0.55</td>
+      <td>0.29</td>
+      <td>0.27</td>
+      <td>0.26</td>
+      <td>0.40</td>
+      <td>0.32</td>
+    </tr>
+    <tr>
+      <th>2015</th>
+      <td>0.13</td>
+      <td>0.43</td>
+      <td>0.39</td>
+      <td>0.50</td>
+      <td>0.68</td>
+      <td>0.33</td>
+      <td>0.32</td>
+      <td>0.19</td>
+      <td>0.80</td>
+      <td>0.23</td>
+      <td>0.53</td>
+      <td>0.29</td>
+    </tr>
+    <tr>
+      <th>2016</th>
+      <td>0.42</td>
+      <td>0.36</td>
+      <td>0.16</td>
+      <td>0.73</td>
+      <td>0.23</td>
+      <td>0.50</td>
+      <td>0.23</td>
+      <td>0.42</td>
+      <td>0.43</td>
+      <td>0.26</td>
+      <td>0.43</td>
+      <td>0.65</td>
+    </tr>
+    <tr>
+      <th>2017</th>
+      <td>0.26</td>
+      <td>0.18</td>
+      <td>0.19</td>
+      <td>0.23</td>
+      <td>0.35</td>
+      <td>0.33</td>
+      <td>0.32</td>
+      <td>0.26</td>
+      <td>0.30</td>
+      <td>0.32</td>
+      <td>0.53</td>
+      <td>0.32</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>The grouped and unstacked data looks good. The number of earthquakes per day for each month is consistent with previous calculations; the average of each month column should equal the values plotted in the monthly bar graph above. Using the heatmap plot in the Seaborn package, let&rsquo;s see if there actually is an overall trend of more earthquakes in April and fewer in July.</p>
+
+<h3 id="heatmap-for-events-by-year-and-month">Heatmap for events by year and month</h3>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plot a heatmap of the unstacked DataFrame created above</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">8</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">df_newcol</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&#34;bone_r&#34;</span><span class="p">,</span> <span class="n">yticklabels</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                 <span class="n">cbar_kws</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;Number of earthquakes per day&#39;</span><span class="p">})</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> 
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></div>
+<p><img src="/images/eq_stats1/output_23_0.png" alt="png" /></p>
+
+<h3 id="april-showers-bring-earthquakes">April showers bring&hellip;earthquakes?</h3>
+
+<p>It seems like there are actually more events in April and fewer in July. In April, especially from 2004 until 2016, there are more events than many of the other months, as shown by the line of darker shading. I don&rsquo;t quite know what is going on here so there is definitely more to be done to see where (on Earth) these events are happening and if there is any physical reason. We are also only looking at about 40 years of data here, so it may be that this pattern wouldn&rsquo;t be present with a larger sample size.</p>
+
+<p>There is definitely more to do with this data set and other similar earthquake catalog data. Specifically, I would look at how the magnitudes of the earthquakes break down over individual years and months. It would also be helpful to look at where the earthquakes are occuring, especially by comparing the locations from month to month.</p>
+
+<p>The data set used in this analysis is available <a href="https://github.com/nwhoffman/earthquake_stats/blob/master/eq_1970_M6.csv" target="_blank">here</a> and the Jupyter notebook is <a href="https://github.com/nwhoffman/earthquake_stats/blob/master/eq_stats1.ipynb" target="_blank">here</a>.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>An Analysis of Gilmore Girls Rankings</title>
+            <link>https://nicolew.xyz/posts/2016/11/an-analysis-of-gilmore-girls-rankings/</link>
+            <pubDate>Mon, 21 Nov 2016 00:00:00 +0000</pubDate>
+            
+            <guid>https://nicolew.xyz/posts/2016/11/an-analysis-of-gilmore-girls-rankings/</guid>
+            <description>With the premier of the older and wiser Gilmore Girls just days away, I thought it would be fun to take a look at the original 153 episodes of the show. I am by no means an expert on the series, or even a huge fan, but I did watch it semi-regularly when it originally aired and re-watched most of the the series earlier this year. I was inspired to do this analysis after coming across some rankings for every single episode.</description>
+            <content type="html"><![CDATA[
+
+<p>With the premier of the older and wiser Gilmore Girls just days away, I thought it would be fun to take a look at the original 153 episodes of the show. I am by no means an expert on the series, or even a huge fan, but I did watch it semi-regularly when it originally aired and re-watched most of the the series earlier this year. I was inspired to do this analysis after coming across some rankings for every single episode. So grab the poptarts and coffee and we can get started!</p>
+
+<h3 id="the-rankings">The Rankings</h3>
+
+<p>The rankings come from a couple of different sources. Two were complied by writers for their websites, <a href="http://www.vox.com/culture/2016/11/14/13034530/gilmore-girls-every-episode-ranked" target="_blank">Vox</a> and <a href="https://www.pastemagazine.com/articles/2016/11/every-episode-of-gilmore-girls-ranked-all-153-of-e.html" target="_blank">Paste Magazine</a>. One is from a <a href="https://www.buzzfeed.com/janinelhaines/ultimate-ranking-of-the-gilmore-girls-episodes-1jehh" target="_blank">Buzz Feed community member</a> and one is from a blogger at <a href="https://hauntedcoconut.wordpress.com/2016/11/15/gilmore-girls-every-episode-ranked/" target="_blank">The Haunted Coconut</a>. So there is a range of sources, from paid writers to individuals who are really interested in, and presumably somewhat knowledgeable about, the show.</p>
+
+<p>First, we need the data. <a href="https://en.wikipedia.org/wiki/Gilmore_Girls" target="_blank">Wikipedia</a> has a lot of information, including episode titles, writers, directors, air dates, and viewing numbers. For this initial look at the rankings, I didn&rsquo;t really need the other data but it is available <a href="https://nwhoffman.github.io/static/data_sets/gilmore_girls.csv" target="_blank">here</a> if you want to download and play around with the numbers.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+
+<span class="c1"># Import pandas and load the data as a data frame.</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;/ipynb/gilmore/gilmore_girls.csv&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Import matplotlib</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">rcParams</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+
+<span class="c1"># Use the matplotlib style sheets</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;fivethirtyeight&#39;</span><span class="p">)</span>
+
+<span class="c1"># Lists to set season positions, rank titles, colors, etc.</span>
+<span class="n">sea_num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">44</span><span class="p">,</span> <span class="mi">66</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">132</span><span class="p">,</span> <span class="mi">153</span><span class="p">,</span> <span class="mi">153</span><span class="p">]</span>
+<span class="n">transp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span><span class="mf">0.40</span><span class="p">,</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">mycolor</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">]</span>
+<span class="n">rank_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Vox&#39;</span><span class="p">,</span> <span class="s1">&#39;Paste&#39;</span><span class="p">,</span> <span class="s1">&#39;Buzz&#39;</span><span class="p">,</span> <span class="s1">&#39;Coconut&#39;</span><span class="p">]</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.27</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.38</span><span class="p">);</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">temp</span><span class="o">=</span><span class="mi">221</span><span class="o">+</span><span class="n">i</span> <span class="c1">#temporary variable for the subplot position</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;No. in series&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="n">rank_name</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> 
+             <span class="n">color</span><span class="o">=</span><span class="n">mycolor</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    
+    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">((</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span><span class="mi">160</span><span class="p">,</span><span class="mi">160</span><span class="p">,</span><span class="o">-</span><span class="mi">5</span><span class="p">)),</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Episode Number (series)&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Rank&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">rank_name</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="n">sea_num</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">sea_num</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="n">transp</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;purple&#39;</span><span class="p">)</span></code></pre></div>
+<p><img src="/images/gilmore_girls/output_2_0.png" alt="png" /></p>
+
+<p>The four different rankings are plotted as a function of the episode number (from 1 to 153). The lower the rank, the better the episode. The seasons are represented by the purple shading, going from light purple for Season 1 to darker for Season 7. This was not intended to represent the overall tone of the seasons, but Season 7 certainly has a greater number of lower rankings so it seems fitting.</p>
+
+<p>What can we see in these rankings? The authors definitely agree that Season 7 wasn&rsquo;t as good as the other seasons; those early episodes started off pretty bad but did improve near the very end of the series. Season 4 also didn&rsquo;t have a lot of top ranked episodes, with very few making it into the top 20. But there is a lot of variation for most of the episode rankings, which is good.</p>
+
+<p>So how do these different rankings compare to each other? Let&rsquo;s average them together, find the standard deviation, and make another plot. I think Rory would like all these plots, right?</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Average over the rankings and add new columns to the dataframe</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;avg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;Vox&#39;</span><span class="p">,</span> <span class="s1">&#39;Paste&#39;</span><span class="p">,</span> <span class="s1">&#39;Buzz&#39;</span><span class="p">,</span> <span class="s1">&#39;Coconut&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;Vox&#39;</span><span class="p">,</span> <span class="s1">&#39;Paste&#39;</span><span class="p">,</span> <span class="s1">&#39;Buzz&#39;</span><span class="p">,</span> <span class="s1">&#39;Coconut&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">6</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;No. in series&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Vox&#39;</span><span class="p">],</span><span class="s1">&#39;b.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;No. in series&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Paste&#39;</span><span class="p">],</span><span class="s1">&#39;g.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;No. in series&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Buzz&#39;</span><span class="p">],</span><span class="s1">&#39;m.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;No. in series&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Coconut&#39;</span><span class="p">],</span><span class="s1">&#39;c.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;No. in series&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;avg&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> 
+             <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;purple&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;average with std/2&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="n">sea_num</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sea_num</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="n">transp</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;purple&#39;</span><span class="p">)</span>
+    
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">155</span><span class="p">,</span><span class="mi">160</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Episode Number (series)&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Rank&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">),</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">numpoints</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code></pre></div>
+<p><img src="/images/gilmore_girls/output_5_1.png" alt="png" /></p>
+
+<p>All of the rankings along with their average standard deviation are plotted here. I divided the standard deviation by two since it was kind of large and would have overwhelmed the plot, but you can still get an idea of how much relative variation there is.</p>
+
+<p>There are some interesting features that can be pointed out.  A few episodes stand out as great for all four sets of rankings: <em>The Bracebridge Dinner</em> (season 2, episode 10), <em>Raincoats and Recipes</em> (season 4, episode 22), and <em>Wedding Bell Blues</em> (season 5, episode 13).</p>
+
+<p>On the lower ranked side of things, <em>Here Comes the Son</em> (season 3, episode 21) is disliked by all four of the ranking authors and really stands out as the worst episode in Season 3. I wouldn&rsquo;t be surprised to find that episode on the bottom of most people&rsquo;s lists; it was intended as the pilot for a spin-off series about Jess. Guess that didn&rsquo;t work out too well.</p>
+
+<h4 id="season-7-well-at-least-it-got-better">Season 7: Well, at least it got better.</h4>
+
+<p>And now we come to Season 7. There is an obvious cluster of low ranked episodes with small deviations. It&rsquo;s no surprise to fans of the show that season 7 didn&rsquo;t get off to a great start. The main writers left and the show struggled to find a, well, plot. The first two episodes, <em>The Long Morrow</em> and <em>That&rsquo;s What You Get, Folks, for Makin&rsquo; Whoopee</em>, have the two lowest average rankings. The less said about these episodes, the better. There are lots of reviews on the interwebs, so I won&rsquo;t link any specific ones here. At least things begin to look up towards the end of the series, with a nice steady climb to a decently ranked series finale.</p>
+
+<h3 id="best-and-worst-episodes">Best and Worst Episodes</h3>
+
+<p>Let&rsquo;s take a quick look at how the standard deviation depends on the average rank. This can help us to see if there is actually any agreement on the best and worst episode rankings.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Standard deviation as a function of rank</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;fivethirtyeight&#39;</span><span class="p">)</span>
+<span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">6</span>
+
+<span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Season 1&#39;</span><span class="p">,</span> <span class="s1">&#39;Season 2&#39;</span><span class="p">,</span> <span class="s1">&#39;Season 3&#39;</span><span class="p">,</span> <span class="s1">&#39;Season 4&#39;</span><span class="p">,</span> <span class="s1">&#39;Season 5&#39;</span><span class="p">,</span> <span class="s1">&#39;Season 6&#39;</span><span class="p">,</span> <span class="s1">&#39;Season 7&#39;</span><span class="p">]</span>
+<span class="n">ggcolor</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;purple&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Season&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">][</span><span class="s1">&#39;avg&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Season&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">][</span><span class="s1">&#39;std&#39;</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> 
+             <span class="n">color</span><span class="o">=</span><span class="n">ggcolor</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Average Episode Rank&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Standard Deviation&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">),</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">numpoints</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span></code></pre></div>
+<p><img src="/images/gilmore_girls/output_7_1.png" alt="png" /></p>
+
+<p>We can see that the standard deviation is relatively low for the higest ranked episodes, especially those in the top 40. The authors of the ranking lists appear to agree on what the best episodes are. This makes sense; most people would probably have an easier time identifying the best shows in a series since what makes an episode &ldquo;good&rdquo; might be more agreed upon. There are also relatively smaller standard deviations for the lower ranked episodes but the trend is not as clear here. I think it would be more difficult to pinpoint what makes an episode &ldquo;bad&rdquo; since there is likely more variation in what is disliked about a show.</p>
+
+<p>Just a quick note: what is going on with episode 79? <em>The Incredible Sinking Lorelais</em> (season 4, episode 14) got two pretty good rankings (25, 30) and then two poor rankings (105, 120). I guess that was a polarizing episode for this particular set of reviewers!</p>
+
+<p>It might be a good idea to see how the episode rankings change during each individual season. Let&rsquo;s get the data ready to make yet another plot, this time comparing seasons directly.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Calculate the average (e.g. average rank of episode 13)</span>
+<span class="n">avg_ep</span> <span class="o">=</span> <span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;No. in season&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">episode</span><span class="p">][</span><span class="s1">&#39;avg&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">for</span> <span class="n">episode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">23</span><span class="p">)]</span>
+<span class="c1">#std_ep = [df[df[&#39;No. in season&#39;] == episode][&#39;std&#39;].mean() for episode in range(1,23)]</span>
+
+<span class="c1"># Calculate the standard deviations for each average eipsode rank (with error propagation)</span>
+<span class="c1"># Square each element in the column and put the values in a new column</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;std_sq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+<span class="c1"># Sum the squares for each episode number (e.g. the sum of squares for all 7 episode 13&#39;s)</span>
+<span class="n">std_prop</span> <span class="o">=</span> <span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;No. in season&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">episode</span><span class="p">][</span><span class="s1">&#39;std_sq&#39;</span><span class="p">]</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">episode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">23</span><span class="p">)]</span>
+<span class="c1"># Take the square root for each sum of squares</span>
+<span class="n">std_prop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">std_prop</span><span class="p">)</span>
+
+<span class="c1"># Make separate lists for the error in ranking (makes plotting call less messy)</span>
+<span class="n">yerr_m</span> <span class="o">=</span> <span class="p">[</span><span class="n">x1</span> <span class="o">-</span> <span class="n">x2</span> <span class="k">for</span> <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">avg_ep</span><span class="p">,</span> <span class="n">std_prop</span><span class="p">)]</span>
+<span class="n">yerr_p</span> <span class="o">=</span> <span class="p">[</span><span class="n">x1</span> <span class="o">+</span> <span class="n">x2</span> <span class="k">for</span> <span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">avg_ep</span><span class="p">,</span> <span class="n">std_prop</span><span class="p">)]</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;fivethirtyeight&#39;</span><span class="p">)</span>
+<span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">6</span>
+
+<span class="n">ggcolor</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;purple&#39;</span><span class="p">]</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Season 1&#39;</span><span class="p">,</span><span class="s1">&#39;Season 2&#39;</span><span class="p">,</span><span class="s1">&#39;Season 3&#39;</span><span class="p">,</span><span class="s1">&#39;Season 4&#39;</span><span class="p">,</span><span class="s1">&#39;Season 5&#39;</span><span class="p">,</span><span class="s1">&#39;Season 6&#39;</span><span class="p">,</span><span class="s1">&#39;Season 7&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Season&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">][</span><span class="s1">&#39;No. in season&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Season&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">][</span><span class="s1">&#39;avg&#39;</span><span class="p">],</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> 
+             <span class="n">label</span><span class="o">=</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">ggcolor</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Season&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">][</span><span class="s1">&#39;No. in season&#39;</span><span class="p">],</span> <span class="n">yerr_m</span><span class="p">,</span> 
+         <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span> <span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Uncertainity&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Season&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">][</span><span class="s1">&#39;No. in season&#39;</span><span class="p">],</span> <span class="n">yerr_p</span><span class="p">,</span> 
+         <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span> <span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+    
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">((</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">23</span><span class="p">,</span><span class="mi">200</span><span class="p">,</span><span class="o">-</span><span class="mi">45</span><span class="p">)),</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;minor&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Gilmore Girls Episode Rankings&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Episode Number&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Average Rank&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;cyan&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Jan-Feb Sweeps&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="mi">19</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Apr-May Sweeps&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">),</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">numpoints</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span></code></pre></div>
+<p><img src="/images/gilmore_girls/output_10_1.png" alt="png" /></p>
+
+<h3 id="the-lorelai-sweeps">The Lorelai Sweeps?</h3>
+
+<p>This is a fun plot! It&rsquo;s a little bit busy, but we still see some general trends in how the episode rankings change over a season. Except for Season 7 (poor Season 7), the season openers begin with moderately decent rankings. The rankings bounce around a bit until the January-February and April-May sweeps, where there is a definite increase in the average rankings for most of the seasons. Finishing up with each season, we continue with a few more ups and downs before ending with a high-ranked finale, except for Season 1 which had a lower ranking finale compare to the season opener.</p>
+
+<p>The uncertainity in the standard deviation is pretty big, though. With only four sets of rankings, if any one of the rankings is a bit higher or lower than the others, the uncertainity will be large and propagate through. I debated even plotting the uncertainity here but I thought it was important to keep in mind when looking at the overall season rankings. So, using the rankings, which season was the best overall?</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Calculate the average and uncertainity of the rankings for each season</span>
+<span class="c1"># Create a dataframe to summarize the results (because it prints a pretty table)</span>
+<span class="n">df2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Season&#39;</span><span class="p">,</span> <span class="s1">&#39;Season average&#39;</span><span class="p">,</span> <span class="s1">&#39;Season std&#39;</span><span class="p">])</span>
+<span class="n">df2</span><span class="p">[</span><span class="s1">&#39;Season&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">df2</span><span class="p">[</span><span class="s1">&#39;Season average&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Season&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">season</span><span class="p">][</span><span class="s1">&#39;avg&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">for</span> <span class="n">season</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">)]</span>
+<span class="c1"># Calculate the propagated uncertainity (sum the squares, take the square root)</span>
+<span class="n">df2</span><span class="p">[</span><span class="s1">&#39;Season std&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Season&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">season</span><span class="p">][</span><span class="s1">&#39;std_sq&#39;</span><span class="p">]</span><span class="o">.</span><span class="nb">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">season</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">)]</span>
+<span class="n">df2</span><span class="p">[</span><span class="s1">&#39;Season std&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df2</span><span class="p">[</span><span class="s1">&#39;Season std&#39;</span><span class="p">]</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">)</span>
+
+<span class="n">df2</span> <span class="o">=</span> <span class="n">df2</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Season average&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></code></pre></div>
+<p><strong>Season 4</strong> &ndash; 65 (+/- 149)<br />
+<strong>Season 2</strong> &ndash; 68 (+/- 157)<br />
+<strong>Season 3</strong> &ndash; 72 (+/- 143)<br />
+<strong>Season 1</strong> &ndash; 72 (+/- 175)<br />
+<strong>Season 5</strong> &ndash; 72 (+/- 190)<br />
+<strong>Season 6</strong> &ndash; 87 (+/- 180)<br />
+<strong>Season 7</strong> &ndash; 103 (+/- 125)</p>
+
+<p>It looks like season 4 is the winner!  But not significantly. The uncertainity is really big, so all the seasons are essentially ranked about the same. Season 7 does stand out (a little) with a lower rank and smaller uncertainity, but even that is not actually significant. All the seasons can be first! With lots many more sets of rankings, that uncertainity would go way down. So, if you really want to know the best season, then time to get reviewing. We&rsquo;ll need a lot more coffee.</p>
+
+<h3 id="the-end">The End</h3>
+
+<p>So we have come to the end of this analysis of the Gilmore Girls episode rankings. I hope that this has been as interesting for you as it was for me. There is definitely more to the rankings than I initially thought, and so I really enjoyed putting together this analysis. A big thanks to the writers who carefully watched <em>every single episode</em> and thoughtfully ranked them. And a special thanks to my daughter, who patiently read out list after list for me to enter in my spreadsheet. She has been motivated to begin learning some Python (and to watch the new episodes, of course).</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Sentiment Analysis of Anne of Green Gables</title>
+            <link>https://nicolew.xyz/posts/2016/11/sentiment-analysis-of-anne-of-green-gables/</link>
+            <pubDate>Sat, 12 Nov 2016 00:00:00 +0000</pubDate>
+            
+            <guid>https://nicolew.xyz/posts/2016/11/sentiment-analysis-of-anne-of-green-gables/</guid>
+            <description>Anne of Green Gables is probably the best known novel by Canadian author Lucy Maude Montgomery. The series of eight novels, of which Anne of Green Gables is the first, revolves around Anne Shirley and her life from age 11 until the end of the first world war, when she is 40 years old. I enjoy almost all of Montgomery&amp;rsquo;s books so I thought it would be interesting to take a closer look at her work using some natural language processing techniques, specifically sentiment analysis.</description>
+            <content type="html"><![CDATA[
+
+<p><em>Anne of Green Gables</em> is probably the best known novel by Canadian author <a href="https://en.wikipedia.org/wiki/Lucy_Maud_Montgomery" target="_blank">Lucy Maude Montgomery</a>. The series of eight novels, of which <em>Anne of Green Gables</em> is the first, revolves around Anne Shirley and her life from age 11 until the end of the first world war, when she is 40 years old. I enjoy almost all of Montgomery&rsquo;s books so I thought it would be interesting to take a closer look at her work using some natural language processing techniques, specifically sentiment analysis.</p>
+
+<h3 id="natural-language-processing">Natural Language Processing</h3>
+
+<p>So, what is natural language processing (NLP)? Basically, it is the process of using computers to analyze and extract information from natural (human) language. NLP is field of study that overlaps with computer science, artificial intelligence, and computational linguistics. Some of the more common or familiar tasks in NLP include: machine translation, automatic summarization, speech recognition, parsing (analyze grammar), and sentiment analysis.</p>
+
+<p>Sentiment analysis is used to quantify the emotional state or attitude of a speaker or writer. This is usually determined by measuring the polarity of the words in the text: are they positive, negative, or neutral? A sentiment polarity value can be determined for an individual word, a complete sentence, or an arbitrary chunk of text such as a tweet or movie review.</p>
+
+<p>This sentiment analysis of <em>Anne of Green Gables</em> will focus on how the relative sentiment polarity changes over the course of the novel. Eventually, I would like to analyze the sentiment for each of the novels in the <em>Anne</em> series and compare with the sentiment of the novels in the <em>Emily</em> series. In order to analyze the novel, we need the next! Almost all of Montgomery&rsquo;s work is available at <a href="http://www.gutenberg.org/wiki/Main_Page" target="_blank">Project Gutenberg</a>.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Import this stuff to make Python 3 functions work in Python 2</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">from</span> <span class="nn">urllib2</span> <span class="kn">import</span> <span class="n">urlopen</span>
+<span class="kn">from</span> <span class="nn">unidecode</span> <span class="kn">import</span> <span class="n">unidecode</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&#34;http://www.gutenberg.org/files/45/45-0.txt&#34;</span> <span class="c1"># text for &#34;Anne of Green Gables&#34;</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="n">raw</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="c1"># Convert bytes to unicode</span>
+<span class="n">raw_decode</span> <span class="o">=</span> <span class="n">unidecode</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="c1"># Decode some &#34;weird&#34; characters to the closest ascii equivalent</span>
+<span class="n">raw_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_decode</span><span class="p">)</span> <span class="c1"># Convert from unicode string to plain string</span>
+<span class="n">raw_string</span> <span class="o">=</span> <span class="n">raw_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="c1"># replace the &#34; \r\n &#34; characters with a space</span></code></pre></div>
+<p>Now we have the text of the novel, including the header and footer information from Project Gutenberg. The text is currently a single string of characters, including punctuation and spaces. The header (and the list of chapters) and the standard footer will be sliced out to end up with just the body of the novel.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Remove the header, footer, and chapter list</span>
+<span class="n">start</span> <span class="o">=</span> <span class="n">raw_string</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&#34;MRS. Rachel Lynde lived just where the Avonlea&#34;</span><span class="p">)</span>
+<span class="n">stop</span> <span class="o">=</span> <span class="n">raw_string</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&#34;End of Project Gutenberg&#39;s&#34;</span><span class="p">)</span>
+<span class="n">raw_string</span> <span class="o">=</span> <span class="n">raw_string</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span></code></pre></div>
+<h3 id="tokenization">Tokenization</h3>
+
+<p>Because the text is a single long string of characters, it needs to be tokenized or broken down into smaller pieces of text. In natural language processing, tokens are usually words or sentences. I will be using the <a href="https://github.com/cjhutto/vaderSentimentsentiment" target="_blank">VADER</a> analysis tool, which was designed to classify the sentiment of text at the sentence level, so that&rsquo;s what we&rsquo;ll do. We&rsquo;ll take a closer look at VADER in a minute but first the text needs to be parsed into sentences.</p>
+
+<p>If you are using python for NLP tasks, you are probably going to be using the <a href="http://www.nltk.org/" target="_blank">Natural Language Tool Kit (NLTK)</a>. Let&rsquo;s tokenize and then take a look at some of the sentences to make sure the string was broken down correctly. You will need to have installed the NLTK from the above link before importing the modules.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Import the the NLTK package and the sentence tokenizer function</span>
+<span class="kn">import</span> <span class="nn">nltk</span>
+<span class="kn">from</span> <span class="nn">nltk</span> <span class="kn">import</span> <span class="n">sent_tokenize</span>
+
+<span class="c1"># Tokenize into sentences</span>
+<span class="n">sentences</span> <span class="o">=</span> <span class="n">sent_tokenize</span><span class="p">(</span><span class="n">raw_string</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&#34;Number of sentences in the novel:&#34;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sentences</span><span class="p">))</span></code></pre></div>
+<pre><code>Number of sentences in the novel: 6855
+</code></pre>
+
+<p>Let&rsquo;s look at a section of the novel to check the tokenization. How about the part where Anne describes the poor mouse who met an untimely end in the pudding sauce?</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Find the sentence index for the pudding sauce sentence</span>
+<span class="n">sauce</span> <span class="o">=</span> <span class="n">sentences</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&#34;She was terribly mortified about the pudding sauce last week.&#34;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sauce</span><span class="p">,</span><span class="n">sauce</span><span class="o">+</span><span class="mi">8</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">sentences</span><span class="p">[</span><span class="n">i</span><span class="p">])</span></code></pre></div>
+<pre><code>2904 She was terribly mortified about the pudding sauce last week.
+2905 We had a plum pudding for dinner on Tuesday and there was half the pudding and a pitcherful of sauce left over.
+2906 Marilla said there was enough for another dinner and told me to set it on the pantry shelf and cover it.
+2907 I meant to cover it just as much as could be, Diana, but when I carried it in I was imagining I was a nun - of course I'm a Protestant but I imagined I was a Catholic--taking the veil to bury a broken heart in cloistered seclusion; and I forgot all about covering the pudding sauce.
+2908 I thought of it next morning and ran to the pantry.
+2909 Diana, fancy if you can my extreme horror at finding a mouse drowned in that pudding sauce!
+2910 I lifted the mouse out with a spoon and threw it out in the yard and then I washed the spoon in three waters.
+2911 Marilla was out milking and I fully intended to ask her when she came in if I wouldd give the sauce to the pigs; but when she did come in I was imagining that I was a frost fairy going through the woods turning the trees red and yellow, whichever they wanted to be, so I never thought about the pudding sauce again and Marilla sent me out to pick apples.
+</code></pre>
+
+<p>Those sentences look good; there is a mix of longer and shorter sentences in addition to some dialogue that is correctly tokenized. Let&rsquo;s take a look at the sentiment polarity for each sentence. To do this, we finally get to talk about VADER. <a href="https://pypi.python.org/pypi/vaderSentiment" target="_blank">VADER</a> stands for &ldquo;Valence Aware Dictionary for sEntiment Reasoning&rdquo; and is a rule-based lexicon for evaluating sentiment polarity (positive or negative).</p>
+
+<p>Valence refers to verb valency or how a verb relates to the arguments in a sentence. The sentiment of some words or phrases in a sentence can be changed by other words present in the sentence. The words that modify the sentiment can be called valence-shifters. Examples of these are negatives (not, never), intensifiers (very, really), diminishers (a bit, slightly), and connectors (however, but, although). There is a lot more that could be said about VADER but I will leave that for another notebook.</p>
+
+<p>Let&rsquo;s look at a few sentences individually to see what sort of scores are returned from VADER. Since we already have part of the pudding sauce story printed above, we&rsquo;ll use a couple of those sentences. You will need to install the VADER library before using the sentiment tools.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># The following is to fix a problem of printing to the console after VADER is imported.</span>
+<span class="c1"># The system standard output variables are saved in nb_stdout and then reset after importing VADER</span>
+<span class="c1"># (fix from: https://github.com/cjhutto/vaderSentiment/issues/7)</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">nb_stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+<span class="kn">from</span> <span class="nn">vaderSentiment.vaderSentiment</span> <span class="kn">import</span> <span class="n">sentiment</span> <span class="k">as</span> <span class="n">vaderSentiment</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">nb_stdout</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2886</span><span class="p">,</span><span class="mi">2904</span><span class="p">,</span><span class="mi">2908</span><span class="p">,</span><span class="mi">2909</span><span class="p">]:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">sentences</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">vs</span> <span class="o">=</span> <span class="n">vaderSentiment</span><span class="p">(</span><span class="n">sentences</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\n\t</span><span class="s2">&#34;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vs</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&#34;</span><span class="se">\n\n</span><span class="s2">&#34;</span><span class="p">)</span></code></pre></div>
+<pre><code>The tumblerfuls were generous ones and the raspberry cordial was certainly very nice.
+
+    {'neg': 0.0, 'neu': 0.532, 'pos': 0.468, 'compound': 0.8313}
+
+
+She was terribly mortified about the pudding sauce last week.
+
+    {'neg': 0.286, 'neu': 0.714, 'pos': 0.0, 'compound': -0.5574}
+
+
+I thought of it next morning and ran to the pantry.
+
+    {'neg': 0.0, 'neu': 1.0, 'pos': 0.0, 'compound': 0.0}
+
+
+Diana, fancy if you can my extreme horror at finding a mouse drowned in that pudding sauce!
+
+    {'neg': 0.36, 'neu': 0.64, 'pos': 0.0, 'compound': -0.8356}
+</code></pre>
+
+<h3 id="sentiment-polarity">Sentiment Polarity</h3>
+
+<p>VADER returns the values for negative, neutral, positive, and compound. The compound is the overall polarity of the sentence, given as a number between -1 and 1. The higher the compound score, the more positive the sentiment of the sentence. The first sentence is quite positive but the second and last sentences are definitely more negative. The third sentence is pretty neutral, with a compound score of 0 since there are neither positive or negative words.</p>
+
+<p>Now that we have a better idea of what a sentiment value for different types of sentences looks like, we will go ahead and find the sentiment for all of the sentences in the novel. A definite advantage of VADER is that it is efficient (for a python program) and does not take very long at all to go through the entire novel (just a few seconds on my old-ish laptop running linux).</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Determine the score of each sentence and make a list of just the compound or polarity values</span>
+<span class="n">complete_score</span> <span class="o">=</span> <span class="p">[</span><span class="n">vaderSentiment</span><span class="p">(</span><span class="n">sentence</span><span class="p">)</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">sentences</span><span class="p">]</span>
+<span class="n">polarity</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;compound&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">complete_score</span><span class="p">]</span>
+
+<span class="c1"># Import the modules needed to use matplotlib and have the plots inline in the notebook</span>
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">rcParams</span>
+
+<span class="c1"># Plot the polarity of the sentiment as a function of sentence number in the text.</span>
+<span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">polarity</span><span class="p">,</span><span class="s1">&#39;b.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Sentence Index&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sentences</span><span class="p">),</span> <span class="o">-</span><span class="mf">1.10</span><span class="p">,</span> <span class="mf">1.10</span><span class="p">])</span></code></pre></div>
+<p><img src="/images/green_gables/output_11_1.png" alt="png" /></p>
+
+<p>That is a lot of sentences and sentiment values! It is difficult to see any patterns in the sentiment other than that is is more positive than negative and there are a number of neutral sentences (polarity = 0). In order to better visualize any changes, it would be helpful to apply a running average over a window of an appropriate width, the width being the number of sentences averaged together. If the window is too large, some of the changes in sentiment will be averaged away and changes on shorter &ldquo;time&rdquo; scales might be lost.</p>
+
+<p>To determine a good window width, we can calculate the averaged sentiment for a number of different window sizes and visually determine what looks to be the best. This is still going to be somewhat subjective in terms of what any given individual would deem &ldquo;too smooth&rdquo; or &ldquo;too noisy&rdquo;. And of course, it would depend on the novel. A really long novel with a slowly unfolding plot would probably do okay with averaging over a large window; a fast-paced or shorter book might do better with a smaller number of sentences averaged together.</p>
+
+<p>First, we&rsquo;ll define a function to calculate the running average.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Define a running mean function that averages over a given window of width N (width = number of sentences)</span>
+<span class="k">def</span> <span class="nf">running_mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+    <span class="n">run_sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">run_sum</span><span class="p">[</span><span class="n">N</span><span class="p">:]</span><span class="o">-</span><span class="n">run_sum</span><span class="p">[:</span><span class="o">-</span><span class="n">N</span><span class="p">])</span><span class="o">/</span><span class="n">N</span>
+
+
+<span class="c1"># Calculate a new list (vector) of polarity values, averaged over the window </span>
+<span class="c1"># values of N between 50-80 sentences gave good results</span>
+<span class="n">polarity_ave</span> <span class="o">=</span> <span class="n">running_mean</span><span class="p">(</span><span class="n">polarity</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+
+<span class="c1"># Create a vector of values for the x-axis as a percentage of the novel</span>
+<span class="n">xvalues</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">polarity_ave</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">polarity_ave</span><span class="p">))]</span>
+
+<span class="c1"># Calculate another vectory of polarity values with a very small window (to compare later in a plot)</span>
+<span class="n">polarity_ave_small</span> <span class="o">=</span> <span class="n">running_mean</span><span class="p">(</span><span class="n">polarity</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Create a vector of values for the x-axis as a percentage of the novel</span>
+<span class="n">xvalues_small</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">polarity_ave_small</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">polarity_ave_small</span><span class="p">))]</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">6</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.75</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues_small</span><span class="p">,</span> <span class="n">polarity_ave_small</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues_small</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">polarity_ave_small</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Running Average with N = 5&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Percent of Novel&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity (averaged)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Running Average with N = 60&#39;</span><span class="p">)</span></code></pre></div>
+<p><img src="/images/green_gables/output_14_1.png" alt="png" /></p>
+
+<p>The top plot is using a running average with a small window (averaging over a small number of sentences) and is essentially the &ldquo;raw&rdquo; sentiment of the novel, showing how sentiment changes over short time scales. There are a lot of positive and negative spikes but we can start to see a little bit of a pattern when looking at the lower frequencies or longer time scales.</p>
+
+<p>The bottom plot with with a running average window of 60 sentences and it is now much easier to see changes in sentiment that happen over longer time intervals. There are definite high and low periods that were not averaged away. The magnitude of the sentiment decreased because of the averaging but since we are looking at relative changes over the course of the novel, the absolute scale shouldn&rsquo;t matter.</p>
+
+<p>To take a closer look at events in the novel, we&rsquo;ll split the novel in half and plot each part separately. We can also annotate the plot with what is happening in the novel. Because you were dying to know what all the positive and negative parts were, right?</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Make a string with the anne-otations to be added to the plot below</span>
+<span class="n">text</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Anne is not a boy&#39;</span><span class="p">,</span><span class="s1">&#39;Anne yells at Mrs. Lynde&#39;</span><span class="p">,</span><span class="s1">&#39;Anne meets Diana&#39;</span><span class="p">,</span><span class="s1">&#39;Diana gets drunk&#39;</span><span class="p">,</span><span class="s1">&#39;No more Diana!&#39;</span><span class="p">]</span>
+<span class="n">text</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;Haunted woods &amp; Mr. Phillips departs&#39;</span><span class="p">,</span><span class="s1">&#39;Anne</span><span class="se">\&#39;</span><span class="s1">s Broken ankle&#39;</span><span class="p">,</span><span class="s1">&#39;Miss Stacey!&#39;</span><span class="p">,</span><span class="s1">&#39;Charlottetown trip&#39;</span><span class="p">])</span>
+<span class="n">text</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;Miss Stacey leaves&#39;</span><span class="p">,</span><span class="s1">&#39;Anne wins the Avery&#39;</span><span class="p">])</span>
+
+<span class="c1"># Make more strings with the position of the text and arrows</span>
+<span class="n">xy_pos</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">7.3</span><span class="p">,</span><span class="o">-</span><span class="mf">0.08</span><span class="p">),(</span><span class="mf">22.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.18</span><span class="p">),(</span><span class="mf">28.44</span><span class="p">,</span><span class="mf">0.25</span><span class="p">),(</span><span class="mf">42.28</span><span class="p">,</span><span class="mf">0.25</span><span class="p">),(</span><span class="mf">43.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.175</span><span class="p">)]</span>
+<span class="n">xytext_pos</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">6.8</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">),(</span><span class="mi">24</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">),(</span><span class="mi">24</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),(</span><span class="mi">43</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),(</span><span class="mi">44</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">)]</span>
+
+<span class="n">xy_pos</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="mf">55.7</span><span class="p">,</span><span class="o">-</span><span class="mf">0.18</span><span class="p">),(</span><span class="mf">61.75</span><span class="p">,</span><span class="o">-</span><span class="mf">0.12</span><span class="p">),(</span><span class="mf">63.4</span><span class="p">,</span><span class="mf">0.375</span><span class="p">),(</span><span class="mi">77</span><span class="p">,</span><span class="mf">0.3</span><span class="p">),(</span><span class="mf">84.33</span><span class="p">,</span><span class="o">-</span><span class="mf">0.13</span><span class="p">),(</span><span class="mf">92.79</span><span class="p">,</span><span class="mf">0.3</span><span class="p">)])</span>
+<span class="n">xytext_pos</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="mf">56.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">),(</span><span class="mi">62</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">),(</span><span class="mf">64.75</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),(</span><span class="mi">73</span><span class="p">,</span><span class="mf">0.4</span><span class="p">),(</span><span class="mi">81</span><span class="p">,</span><span class="o">-</span><span class="mf">0.25</span><span class="p">),(</span><span class="mi">93</span><span class="p">,</span><span class="mf">0.45</span><span class="p">)])</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity (averaged)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Running Average with N = 60&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xy</span><span class="o">=</span><span class="n">xy_pos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xytext</span><span class="o">=</span><span class="n">xytext_pos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">arrowprops</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;arrowstyle&#39;</span><span class="p">:</span> <span class="s1">&#39;-&#39;</span><span class="p">},</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Percent of Novel&#39;</span><span class="p">),</span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity (averaged)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">11</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xy</span><span class="o">=</span><span class="n">xy_pos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xytext</span><span class="o">=</span><span class="n">xytext_pos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">arrowprops</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;arrowstyle&#39;</span><span class="p">:</span> <span class="s1">&#39;-&#39;</span><span class="p">},</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span></code></pre></div>
+<p><img src="/images/green_gables/output_17_0.png" alt="png" /></p>
+
+<p>The parts of the novel that a reader would likely identify as positive (new best friend, lovely new teacher, winning a scholarship) are the parts with the highest sentiment polarity. And the parts of the novel that are more negative (yelling at someone, missing a best friend, injury, and sickness) are t!e sections with the most negative sentiment. It looks like VADER did a pretty good job with this text.</p>
+
+<p>Let&rsquo;s take a look at another sentiment classifier and how the results compare to VADER. There is a handy text processing library called <a href="https://textblob.readthedocs.io/en/dev/" target="_blank">TextBlob</a> that makes it much easier to implement many of the functions available in the NLTK. The default sentiment classifier used by TextBlob is the <a href="http://www.clips.ua.ac.be/pattern" target="_blank">PatternAnalyzer</a>. The TextBlob module needs to be installed before you can use the functions.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># TextBlob</span>
+<span class="kn">from</span> <span class="nn">textblob</span> <span class="kn">import</span> <span class="n">TextBlob</span>
+
+<span class="c1"># Use the TextBlob to tokenize the raw string and make a textblob object</span>
+<span class="n">anne_blob</span> <span class="o">=</span> <span class="n">TextBlob</span><span class="p">(</span><span class="n">raw_string</span><span class="p">)</span>
+
+<span class="c1"># Determine the sentiment using the PatternAnalyzer (based on the pattern library)</span>
+<span class="n">blob_sentiment</span> <span class="o">=</span> <span class="p">[</span><span class="n">sentence</span><span class="o">.</span><span class="n">sentiment</span><span class="o">.</span><span class="n">polarity</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">anne_blob</span><span class="o">.</span><span class="n">sentences</span><span class="p">]</span></code></pre></div>
+<p>And then we can plot the sentiment as a function of sentence index.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plot the polarity of the sentiment as a function of sentence number in the text.</span>
+<span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">blob_sentiment</span><span class="p">,</span><span class="s1">&#39;b.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Sentence Index&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity&#39;</span><span class="p">)</span>
+<span class="n">xmax</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">blob_sentiment</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.10</span><span class="p">,</span> <span class="mf">1.10</span><span class="p">])</span></code></pre></div>
+<p><img src="/images/green_gables/output_21_1.png" alt="png" /></p>
+
+<p>The sentiment values from the PatternAnalyzer classifier looks similar to those determined by VADER. The sentiment is overall more positive than negative and tends toward more positive values near the end of novel. The polarity values also tend to cluster at 0.5, 1.0, and -1.0; I&rsquo;m not quite sure what is causing that.</p>
+
+<p>In order to better compare the two sentiment classifiers, I&rsquo;ll make another plot. But first, the TextBlob sentiment also needs to be averaged using the same method applied to the VADER sentiment values. Then come the plots!</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Calculate a new list (vector) of polarity values, averaged over the window N = 60</span>
+<span class="n">blob_ave</span> <span class="o">=</span> <span class="n">running_mean</span><span class="p">(</span><span class="n">blob_sentiment</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+
+<span class="c1"># Create a vector of values for the x-axis as a percentage of the novel</span>
+<span class="n">xvalues_blob</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">blob_ave</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">blob_ave</span><span class="p">))]</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plot the sentiment for each classifier</span>
+<span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">polarity_ave</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity (averaged)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;VADER Sentiment (running average window = 60)&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xvalues_blob</span><span class="p">,</span> <span class="n">blob_ave</span><span class="p">,</span> <span class="s1">&#39;g-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">xvalues_blob</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">blob_ave</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Percent of Novel&#39;</span><span class="p">),</span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity (averaged)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;TextBlob/Pattern Sentiment (running average window = 60)&#39;</span><span class="p">)</span></code></pre></div>
+<p><img src="/images/green_gables/output_24_1.png" alt="png" /></p>
+
+<p>The results look reasonably similar but there are some notable differences. First, using VADER, there is a big dip into negative sentiments when Anne yells at Mrs. Lynde - that is the first time that anything really negative happens in the novel. The PatternAnalyzer almost completely misses it, with only a small dip in sentiment about a quarter of the way through the novel. In general, VADER picks up more negative sentiment overall than PatternAnalyzer. This would certainly be something to examine further.</p>
+
+<p>There are many other interesting things to analyze: sentence length, word length, word frequency, and other sentiment classifiers. We&rsquo;ll look at just a couple of them now. First, let&rsquo;s take a look at a histogram of sentence length, as determined by the number of characters in a sentence. These types of histograms would be interesting to compare for the rest of the books in the <em>Anne</em> series in addition to the other work by Montgomery. Using sentences of different lengths adds variety and interest to a piece of writing and different authors have different distributions of sentence length.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Make a histogram of sentence lengths (in this case, the number of characters per sentence)</span>
+<span class="n">sen_length</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">sentence</span><span class="p">)</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">sentences</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">sen_length</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Number&#39;</span><span class="p">),</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Sentence Length (characters)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Anne of Green Gables&#39;</span><span class="p">)</span></code></pre></div>
+<p><img src="/images/green_gables/output_26_1.png" alt="png" /></p>
+
+<p>We can also look at how sentence length compares to the sentiment. Do longer sentences tend to be positive or negative? Will there be any correlation at all between sentence length and sentiment? Let&rsquo;s find out.</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="c1"># Plot the sentiment score as a function of sentence length</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sen_length</span><span class="p">,</span> <span class="n">polarity</span><span class="p">,</span><span class="s1">&#39;b.&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">450</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Sentence Length (number of characters)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Sentiment Polarity&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Sentiment as a Function of Sentence Length&#39;</span><span class="p">)</span></code></pre></div>
+<p><img src="/images/green_gables/output_28_1.png" alt="png" /></p>
+
+<p>There doesn&rsquo;t seem to be too much here. There is again a trend toward sentences of all length being more positive, but we already saw that in the other plots.</p>
+
+<h3 id="more-to-come">More to Come!</h3>
+
+<p>Overall, the sentiment analysis of <em>Anne of Green Gables</em> was a success! I am actually pleasantly suprised at how well the sentiment changes were captured over the whole novel. This is just the start of analyzing Montgomery&rsquo;s writing, so please check back in to read more.</p>
+]]></content>
+        </item>
+        
+    </channel>
+</rss>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://nicolew.xyz/fr/categories/</loc>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://nicolew.xyz/categories/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="fr"
+                href="https://nicolew.xyz/fr/categories/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://nicolew.xyz/fr/</loc>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://nicolew.xyz/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="fr"
+                href="https://nicolew.xyz/fr/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://nicolew.xyz/fr/tags/</loc>
+    <priority>0</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://nicolew.xyz/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="fr"
+                href="https://nicolew.xyz/fr/tags/"
+                />
+  </url>
+  
+</urlset>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nicole W.</title>
+    <link>https://nicolew.xyz/</link>
+    <description>Recent content on Nicole W.</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
+    <lastBuildDate>Thu, 14 Mar 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://nicolew.xyz/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Kilauea 2018 earthquakes - Visualization with Bokeh</title>
+      <link>https://nicolew.xyz/posts/2019/03/kilauea-2018-earthquakes---visualization-with-bokeh/</link>
+      <pubDate>Thu, 14 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://nicolew.xyz/posts/2019/03/kilauea-2018-earthquakes---visualization-with-bokeh/</guid>
+      <description>The 2018 eruption of Kilauea volcano in Hawaii was accompanied by thousands of small earthquakes over the course of the eruption. This seismicity exhibited an interesting pattern: cycles of increasing earthquake frequency, each ending with a larger magnitude explosive event. Over the course of the 2+ month eruption, there were over 50 of these cycles.
+The Bokeh plotting library provides a lot of great tools to look at a dataset like this, where it might be useful to zoom in on certain cycles or look only at a particular date.</description>
+    </item>
+    
+    <item>
+      <title>Earthquake Statistics - Frequency and Magnitude</title>
+      <link>https://nicolew.xyz/posts/2018/04/earthquake-statistics---frequency-and-magnitude/</link>
+      <pubDate>Sat, 14 Apr 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://nicolew.xyz/posts/2018/04/earthquake-statistics---frequency-and-magnitude/</guid>
+      <description>In a previous blog post, I looked at the number of earthquakes greater than magnitude 6 that occurred globally between 1983 and 2017, and how these events were distributed over different time intervals. While it is useful to look at general seismicity rates over certain time periods, it is also important to understand how the magnitudes of earthquakes are distributed. In other words, how frequently do big events happen compared to small ones?</description>
+    </item>
+    
+    <item>
+      <title>Earthquake Statistics  - When and How Many</title>
+      <link>https://nicolew.xyz/posts/2018/03/earthquake-statistics----when-and-how-many/</link>
+      <pubDate>Mon, 19 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://nicolew.xyz/posts/2018/03/earthquake-statistics----when-and-how-many/</guid>
+      <description>Hundreds of earthquakes happen everyday, all over the Earth. The majority of these events are not felt by people and rarely cause any damage. But, the shaking of the ground doesn&amp;rsquo;t go unnoticed. Earthquakes large and small are detected by number of instruments, including global and local arrays of seismographs recording in locations ranging from the tops of mountains to the bottom of the ocean.
+Understanding when and where earthquakes occur is important for identifying locations where there is an increased risk from damaging earthquakes.</description>
+    </item>
+    
+    <item>
+      <title>An Analysis of Gilmore Girls Rankings</title>
+      <link>https://nicolew.xyz/posts/2016/11/an-analysis-of-gilmore-girls-rankings/</link>
+      <pubDate>Mon, 21 Nov 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://nicolew.xyz/posts/2016/11/an-analysis-of-gilmore-girls-rankings/</guid>
+      <description>With the premier of the older and wiser Gilmore Girls just days away, I thought it would be fun to take a look at the original 153 episodes of the show. I am by no means an expert on the series, or even a huge fan, but I did watch it semi-regularly when it originally aired and re-watched most of the the series earlier this year. I was inspired to do this analysis after coming across some rankings for every single episode.</description>
+    </item>
+    
+    <item>
+      <title>Sentiment Analysis of Anne of Green Gables</title>
+      <link>https://nicolew.xyz/posts/2016/11/sentiment-analysis-of-anne-of-green-gables/</link>
+      <pubDate>Sat, 12 Nov 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://nicolew.xyz/posts/2016/11/sentiment-analysis-of-anne-of-green-gables/</guid>
+      <description>Anne of Green Gables is probably the best known novel by Canadian author Lucy Maude Montgomery. The series of eight novels, of which Anne of Green Gables is the first, revolves around Anne Shirley and her life from age 11 until the end of the first world war, when she is 40 years old. I enjoy almost all of Montgomery&amp;rsquo;s books so I thought it would be interesting to take a closer look at her work using some natural language processing techniques, specifically sentiment analysis.</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://nicolew.xyz/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://nicolew.xyz/about/</guid>
+      <description>I like science and data and combining them in different ways to make cool data science projects. Using my background in geophysics, I like to make interesting visualizations of earth science data, which so far, are mostly about earthquakes.
+I welcome any feedback on my code and analyses. If you have interesting data set ideas, please share! My favourite topics are geophysics, Star Trek, and cats. And aliens.
+I am currently employed in teaching my three children at home.</description>
+    </item>
+    
+    <item>
+      <title>Resume</title>
+      <link>https://nicolew.xyz/resume/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://nicolew.xyz/resume/</guid>
+      <description>Technical Skills Programming: Python (scikit-learn, pandas, NLTK)
+Other: Linux, shell scripting, markdown, git
+Geoscience: ObsPy, SWARM, GMT
+Education M.S. Geophysics
+New Mexico Institute of Mining and Technology (2004)
+B.S. Astrophysics
+University of Minnesota (1999)
+Experience Physics Subject Matter Expert (2014–2015), Rasmussen College
+Created the physics content for the upper-division humanities course Understanding Ourselves Through Physics.
+Astronomy Content Author (2013–2015), Sapling Learning
+Developed web-based interactive questions, including feedback, hints and complete solutions, for college-level astronomy courses.</description>
+    </item>
+    
+  </channel>
+</rss>

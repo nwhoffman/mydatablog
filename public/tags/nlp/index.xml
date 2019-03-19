@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nlp on Nicole W.</title>
+    <link>https://nicolew.xyz/tags/nlp/</link>
+    <description>Recent content in Nlp on Nicole W.</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
+    <lastBuildDate>Mon, 21 Nov 2016 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://nicolew.xyz/tags/nlp/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>An Analysis of Gilmore Girls Rankings</title>
+      <link>https://nicolew.xyz/posts/2016/11/an-analysis-of-gilmore-girls-rankings/</link>
+      <pubDate>Mon, 21 Nov 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://nicolew.xyz/posts/2016/11/an-analysis-of-gilmore-girls-rankings/</guid>
+      <description>With the premier of the older and wiser Gilmore Girls just days away, I thought it would be fun to take a look at the original 153 episodes of the show. I am by no means an expert on the series, or even a huge fan, but I did watch it semi-regularly when it originally aired and re-watched most of the the series earlier this year. I was inspired to do this analysis after coming across some rankings for every single episode.</description>
+    </item>
+    
+    <item>
+      <title>Sentiment Analysis of Anne of Green Gables</title>
+      <link>https://nicolew.xyz/posts/2016/11/sentiment-analysis-of-anne-of-green-gables/</link>
+      <pubDate>Sat, 12 Nov 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://nicolew.xyz/posts/2016/11/sentiment-analysis-of-anne-of-green-gables/</guid>
+      <description>Anne of Green Gables is probably the best known novel by Canadian author Lucy Maude Montgomery. The series of eight novels, of which Anne of Green Gables is the first, revolves around Anne Shirley and her life from age 11 until the end of the first world war, when she is 40 years old. I enjoy almost all of Montgomery&amp;rsquo;s books so I thought it would be interesting to take a closer look at her work using some natural language processing techniques, specifically sentiment analysis.</description>
+    </item>
+    
+  </channel>
+</rss>
