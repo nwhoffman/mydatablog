@@ -1,0 +1,438 @@
+<!doctype html>
+
+<html lang="en" class="h-100">
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="generator" content="Hugo 0.54.0" />
+  <link rel="stylesheet" href="https://www.nicolew.xyz/css/bootstrap.min.css">
+  
+  
+  <title>Sentiment Analysis of Anne of Green Gables | Nicole W</title>
+  <style>
+.container {
+  max-width: 700px;
+}
+#nav a {
+  font-weight: bold;
+  color: inherit;
+}
+#nav a.nav-link-active {
+  background-color: #212529;
+  color: #fff;
+}
+#nav-border {
+  border-bottom: 1px solid #212529;
+}
+#main {
+  margin-top: 1em;
+  margin-bottom: 4em;
+}
+#home-jumbotron {
+  background-color: inherit;
+}
+#footer .container {
+  padding: 1em 0;
+}
+#footer a {
+  color: inherit;
+  text-decoration: underline;
+}
+.font-125 {
+  font-size: 125%;
+}
+.tag-btn {
+  margin-bottom: 0.3em;
+}
+pre {
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 16px;
+}
+pre code {
+  padding: 0;
+  font-size: inherit;
+  color: inherit; 
+  background-color: transparent;
+  border-radius: 0;
+}
+code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #c7254e;
+  background-color: #f9f2f4;
+  border-radius: 4px;
+}
+img,
+iframe,
+embed,
+video,
+audio {
+  max-width: 100%;
+}
+</style>
+</head>
+  <body class="d-flex flex-column h-100">
+    <div id="nav-border" class="container">
+  <nav id="nav" class="nav justify-content-center">
+  
+  
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/"><i data-feather="home"></i> Home</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/posts/"><i data-feather="edit"></i> Blog</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/tags/"><i data-feather="tag"></i> Tags</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/about/"><i data-feather="smile"></i> About</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/index.xml"><i data-feather="rss"></i> RSS</a>
+  
+  </nav>
+</div>
+    <div class="container">
+      <main id="main">
+        
+
+<h1>Sentiment Analysis of Anne of Green Gables</h1>
+
+
+<p><em>Anne of Green Gables</em> is probably the best known novel by Canadian author <a href="https://en.wikipedia.org/wiki/Lucy_Maud_Montgomery">Lucy Maude Montgomery</a>. The series of eight novels, of which <em>Anne of Green Gables</em> is the first, revolves around Anne Shirley and her life from age 11 until the end of the first world war, when she is 40 years old. I enjoy almost all of Montgomery&rsquo;s books so I thought it would be interesting to take a closer look at her work using some natural language processing techniques, specifically sentiment analysis.</p>
+
+<h3 id="natural-language-processing">Natural Language Processing</h3>
+
+<p>So, what is natural language processing (NLP)? Basically, it is the process of using computers to analyze and extract information from natural (human) language. NLP is field of study that overlaps with computer science, artificial intelligence, and computational linguistics. Some of the more common or familiar tasks in NLP include: machine translation, automatic summarization, speech recognition, parsing (analyze grammar), and sentiment analysis.</p>
+
+<p>Sentiment analysis is used to quantify the emotional state or attitude of a speaker or writer. This is usually determined by measuring the polarity of the words in the text: are they positive, negative, or neutral? A sentiment polarity value can be determined for an individual word, a complete sentence, or an arbitrary chunk of text such as a tweet or movie review.</p>
+
+<p>This sentiment analysis of <em>Anne of Green Gables</em> will focus on how the relative sentiment polarity changes over the course of the novel. Eventually, I would like to analyze the sentiment for each of the novels in the <em>Anne</em> series and compare with the sentiment of the novels in the <em>Emily</em> series. In order to analyze the novel, we need the next! Almost all of Montgomery&rsquo;s work is available at <a href="http://www.gutenberg.org/wiki/Main_Page">Project Gutenberg</a>.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Import this stuff to make Python 3 functions work in Python 2</span>
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">__future__</span> <span style="color:#008000;font-weight:bold">import</span> division
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">__future__</span> <span style="color:#008000;font-weight:bold">import</span> print_function
+
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">urllib2</span> <span style="color:#008000;font-weight:bold">import</span> urlopen
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">unidecode</span> <span style="color:#008000;font-weight:bold">import</span> unidecode
+
+url <span style="color:#666">=</span> <span style="color:#ba2121">&#34;http://www.gutenberg.org/files/45/45-0.txt&#34;</span> <span style="color:#408080;font-style:italic"># text for &#34;Anne of Green Gables&#34;</span>
+response <span style="color:#666">=</span> urlopen(url)
+raw <span style="color:#666">=</span> response<span style="color:#666">.</span>read()<span style="color:#666">.</span>decode(<span style="color:#ba2121">&#39;utf8&#39;</span>) <span style="color:#408080;font-style:italic"># Convert bytes to unicode</span>
+raw_decode <span style="color:#666">=</span> unidecode(raw) <span style="color:#408080;font-style:italic"># Decode some &#34;weird&#34; characters to the closest ascii equivalent</span>
+raw_string <span style="color:#666">=</span> <span style="color:#008000">str</span>(raw_decode) <span style="color:#408080;font-style:italic"># Convert from unicode string to plain string</span>
+raw_string <span style="color:#666">=</span> raw_string<span style="color:#666">.</span>replace(<span style="color:#ba2121">&#39;</span><span style="color:#b62;font-weight:bold">\r\n</span><span style="color:#ba2121">&#39;</span>, <span style="color:#ba2121">&#39; &#39;</span>) <span style="color:#408080;font-style:italic"># replace the &#34; \r\n &#34; characters with a space</span></code></pre></div>
+<p>Now we have the text of the novel, including the header and footer information from Project Gutenberg. The text is currently a single string of characters, including punctuation and spaces. The header (and the list of chapters) and the standard footer will be sliced out to end up with just the body of the novel.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Remove the header, footer, and chapter list</span>
+start <span style="color:#666">=</span> raw_string<span style="color:#666">.</span>find(<span style="color:#ba2121">&#34;MRS. Rachel Lynde lived just where the Avonlea&#34;</span>)
+stop <span style="color:#666">=</span> raw_string<span style="color:#666">.</span>find(<span style="color:#ba2121">&#34;End of Project Gutenberg&#39;s&#34;</span>)
+raw_string <span style="color:#666">=</span> raw_string[start:stop]</code></pre></div>
+<h3 id="tokenization">Tokenization</h3>
+
+<p>Because the text is a single long string of characters, it needs to be tokenized or broken down into smaller pieces of text. In natural language processing, tokens are usually words or sentences. I will be using the <a href="https://github.com/cjhutto/vaderSentimentsentiment">VADER</a> analysis tool, which was designed to classify the sentiment of text at the sentence level, so that&rsquo;s what we&rsquo;ll do. We&rsquo;ll take a closer look at VADER in a minute but first the text needs to be parsed into sentences.</p>
+
+<p>If you are using python for NLP tasks, you are probably going to be using the <a href="http://www.nltk.org/">Natural Language Tool Kit (NLTK)</a>. Let&rsquo;s tokenize and then take a look at some of the sentences to make sure the string was broken down correctly. You will need to have installed the NLTK from the above link before importing the modules.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Import the the NLTK package and the sentence tokenizer function</span>
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">nltk</span>
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">nltk</span> <span style="color:#008000;font-weight:bold">import</span> sent_tokenize
+
+<span style="color:#408080;font-style:italic"># Tokenize into sentences</span>
+sentences <span style="color:#666">=</span> sent_tokenize(raw_string)
+<span style="color:#008000;font-weight:bold">print</span>(<span style="color:#ba2121">&#34;Number of sentences in the novel:&#34;</span>, <span style="color:#008000">len</span>(sentences))</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">Number of sentences in the novel: 6855</pre></div>
+<p>Let&rsquo;s look at a section of the novel to check the tokenization. How about the part where Anne describes the poor mouse who met an untimely end in the pudding sauce?</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Find the sentence index for the pudding sauce sentence</span>
+sauce <span style="color:#666">=</span> sentences<span style="color:#666">.</span>index(<span style="color:#ba2121">&#34;She was terribly mortified about the pudding sauce last week.&#34;</span>)
+
+<span style="color:#008000;font-weight:bold">for</span> i <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(sauce,sauce<span style="color:#666">+</span><span style="color:#666">8</span>):
+    <span style="color:#008000;font-weight:bold">print</span>(i, sentences[i])</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">2904 She was terribly mortified about the pudding sauce last week.
+2905 We had a plum pudding for dinner on Tuesday and there was half the pudding and a pitcherful of sauce left over.
+2906 Marilla said there was enough for another dinner and told me to set it on the pantry shelf and cover it.
+2907 I meant to cover it just as much as could be, Diana, but when I carried it in I was imagining I was a nun - of course I&#39;m a Protestant but I imagined I was a Catholic--taking the veil to bury a broken heart in cloistered seclusion; and I forgot all about covering the pudding sauce.
+2908 I thought of it next morning and ran to the pantry.
+2909 Diana, fancy if you can my extreme horror at finding a mouse drowned in that pudding sauce!
+2910 I lifted the mouse out with a spoon and threw it out in the yard and then I washed the spoon in three waters.
+2911 Marilla was out milking and I fully intended to ask her when she came in if I wouldd give the sauce to the pigs; but when she did come in I was imagining that I was a frost fairy going through the woods turning the trees red and yellow, whichever they wanted to be, so I never thought about the pudding sauce again and Marilla sent me out to pick apples.</pre></div>
+<p>Those sentences look good; there is a mix of longer and shorter sentences in addition to some dialogue that is correctly tokenized. Let&rsquo;s take a look at the sentiment polarity for each sentence. To do this, we finally get to talk about VADER. <a href="https://pypi.python.org/pypi/vaderSentiment">VADER</a> stands for &ldquo;Valence Aware Dictionary for sEntiment Reasoning&rdquo; and is a rule-based lexicon for evaluating sentiment polarity (positive or negative).</p>
+
+<p>Valence refers to verb valency or how a verb relates to the arguments in a sentence. The sentiment of some words or phrases in a sentence can be changed by other words present in the sentence. The words that modify the sentiment can be called valence-shifters. Examples of these are negatives (not, never), intensifiers (very, really), diminishers (a bit, slightly), and connectors (however, but, although). There is a lot more that could be said about VADER but I will leave that for another notebook.</p>
+
+<p>Let&rsquo;s look at a few sentences individually to see what sort of scores are returned from VADER. Since we already have part of the pudding sauce story printed above, we&rsquo;ll use a couple of those sentences. You will need to install the VADER library before using the sentiment tools.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># The following is to fix a problem of printing to the console after VADER is imported.</span>
+<span style="color:#408080;font-style:italic"># The system standard output variables are saved in nb_stdout and then reset after importing VADER</span>
+<span style="color:#408080;font-style:italic"># (fix from: https://github.com/cjhutto/vaderSentiment/issues/7)</span>
+
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">sys</span>
+nb_stdout <span style="color:#666">=</span> sys<span style="color:#666">.</span>stdout
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">vaderSentiment.vaderSentiment</span> <span style="color:#008000;font-weight:bold">import</span> sentiment <span style="color:#008000;font-weight:bold">as</span> vaderSentiment
+sys<span style="color:#666">.</span>stdout <span style="color:#666">=</span> nb_stdout
+
+<span style="color:#008000;font-weight:bold">for</span> i <span style="color:#a2f;font-weight:bold">in</span> [<span style="color:#666">2886</span>,<span style="color:#666">2904</span>,<span style="color:#666">2908</span>,<span style="color:#666">2909</span>]:
+    <span style="color:#008000;font-weight:bold">print</span>(sentences[i])
+    vs <span style="color:#666">=</span> vaderSentiment(sentences[i])
+    <span style="color:#008000;font-weight:bold">print</span>(<span style="color:#ba2121">&#34;</span><span style="color:#b62;font-weight:bold">\n\t</span><span style="color:#ba2121">&#34;</span> <span style="color:#666">+</span> <span style="color:#008000">str</span>(vs) <span style="color:#666">+</span> <span style="color:#ba2121">&#34;</span><span style="color:#b62;font-weight:bold">\n\n</span><span style="color:#ba2121">&#34;</span>)</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">The tumblerfuls were generous ones and the raspberry cordial was certainly very nice.
+
+    {&#39;neg&#39;: 0.0, &#39;neu&#39;: 0.532, &#39;pos&#39;: 0.468, &#39;compound&#39;: 0.8313}
+
+
+She was terribly mortified about the pudding sauce last week.
+
+    {&#39;neg&#39;: 0.286, &#39;neu&#39;: 0.714, &#39;pos&#39;: 0.0, &#39;compound&#39;: -0.5574}
+
+
+I thought of it next morning and ran to the pantry.
+
+    {&#39;neg&#39;: 0.0, &#39;neu&#39;: 1.0, &#39;pos&#39;: 0.0, &#39;compound&#39;: 0.0}
+
+
+Diana, fancy if you can my extreme horror at finding a mouse drowned in that pudding sauce!
+
+    {&#39;neg&#39;: 0.36, &#39;neu&#39;: 0.64, &#39;pos&#39;: 0.0, &#39;compound&#39;: -0.8356}</pre></div>
+<h3 id="sentiment-polarity">Sentiment Polarity</h3>
+
+<p>VADER returns the values for negative, neutral, positive, and compound. The compound is the overall polarity of the sentence, given as a number between -1 and 1. The higher the compound score, the more positive the sentiment of the sentence. The first sentence is quite positive but the second and last sentences are definitely more negative. The third sentence is pretty neutral, with a compound score of 0 since there are neither positive or negative words.</p>
+
+<p>Now that we have a better idea of what a sentiment value for different types of sentences looks like, we will go ahead and find the sentiment for all of the sentences in the novel. A definite advantage of VADER is that it is efficient (for a python program) and does not take very long at all to go through the entire novel (just a few seconds on my old-ish laptop running linux).</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Determine the score of each sentence and make a list of just the compound or polarity values</span>
+complete_score <span style="color:#666">=</span> [vaderSentiment(sentence) <span style="color:#008000;font-weight:bold">for</span> sentence <span style="color:#a2f;font-weight:bold">in</span> sentences]
+polarity <span style="color:#666">=</span> [line<span style="color:#666">.</span>get(<span style="color:#ba2121">&#39;compound&#39;</span>) <span style="color:#008000;font-weight:bold">for</span> line <span style="color:#a2f;font-weight:bold">in</span> complete_score]
+
+<span style="color:#408080;font-style:italic"># Import the modules needed to use matplotlib and have the plots inline in the notebook</span>
+<span style="color:#666">%</span>matplotlib inline
+
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">matplotlib</span>
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">numpy</span> <span style="color:#008000;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">np</span>
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">matplotlib.pyplot</span> <span style="color:#008000;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">plt</span>
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">pylab</span> <span style="color:#008000;font-weight:bold">import</span> rcParams
+
+<span style="color:#408080;font-style:italic"># Plot the polarity of the sentiment as a function of sentence number in the text.</span>
+rcParams[<span style="color:#ba2121">&#39;figure.figsize&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">14</span>, <span style="color:#666">4</span>
+plt<span style="color:#666">.</span>plot(polarity,<span style="color:#ba2121">&#39;b.&#39;</span>)
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Sentence Index&#39;</span>), plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Sentiment Polarity&#39;</span>)
+plt<span style="color:#666">.</span>axis([<span style="color:#666">0</span>, <span style="color:#008000">len</span>(sentences), <span style="color:#666">-</span><span style="color:#666">1.10</span>, <span style="color:#666">1.10</span>])</code></pre></div>
+<p><img src="/images/green_gables/output_11_1.png" alt="png" /></p>
+
+<p>That is a lot of sentences and sentiment values! It is difficult to see any patterns in the sentiment other than that is is more positive than negative and there are a number of neutral sentences (polarity = 0). In order to better visualize any changes, it would be helpful to apply a running average over a window of an appropriate width, the width being the number of sentences averaged together. If the window is too large, some of the changes in sentiment will be averaged away and changes on shorter &ldquo;time&rdquo; scales might be lost.</p>
+
+<p>To determine a good window width, we can calculate the averaged sentiment for a number of different window sizes and visually determine what looks to be the best. This is still going to be somewhat subjective in terms of what any given individual would deem &ldquo;too smooth&rdquo; or &ldquo;too noisy&rdquo;. And of course, it would depend on the novel. A really long novel with a slowly unfolding plot would probably do okay with averaging over a large window; a fast-paced or shorter book might do better with a smaller number of sentences averaged together.</p>
+
+<p>First, we&rsquo;ll define a function to calculate the running average.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Define a running mean function that averages over a given window of width N (width = number of sentences)</span>
+<span style="color:#008000;font-weight:bold">def</span> <span style="color:#00f">running_mean</span>(x, N):
+    run_sum <span style="color:#666">=</span> np<span style="color:#666">.</span>cumsum(np<span style="color:#666">.</span>insert(x,<span style="color:#666">0</span>,<span style="color:#666">0</span>))
+    <span style="color:#008000;font-weight:bold">return</span>(run_sum[N:]<span style="color:#666">-</span>run_sum[:<span style="color:#666">-</span>N])<span style="color:#666">/</span>N
+
+
+<span style="color:#408080;font-style:italic"># Calculate a new list (vector) of polarity values, averaged over the window </span>
+<span style="color:#408080;font-style:italic"># values of N between 50-80 sentences gave good results</span>
+polarity_ave <span style="color:#666">=</span> running_mean(polarity, <span style="color:#666">60</span>)
+
+<span style="color:#408080;font-style:italic"># Create a vector of values for the x-axis as a percentage of the novel</span>
+xvalues <span style="color:#666">=</span> [index<span style="color:#666">*</span><span style="color:#666">100</span><span style="color:#666">/</span><span style="color:#008000">len</span>(polarity_ave) <span style="color:#008000;font-weight:bold">for</span> index <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#008000">len</span>(polarity_ave))]
+
+<span style="color:#408080;font-style:italic"># Calculate another vectory of polarity values with a very small window (to compare later in a plot)</span>
+polarity_ave_small <span style="color:#666">=</span> running_mean(polarity, <span style="color:#666">5</span>)
+
+<span style="color:#408080;font-style:italic"># Create a vector of values for the x-axis as a percentage of the novel</span>
+xvalues_small <span style="color:#666">=</span> [index<span style="color:#666">*</span><span style="color:#666">100</span><span style="color:#666">/</span><span style="color:#008000">len</span>(polarity_ave_small) <span style="color:#008000;font-weight:bold">for</span> index <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#008000">len</span>(polarity_ave_small))]</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">rcParams[<span style="color:#ba2121">&#39;figure.figsize&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">14</span>, <span style="color:#666">6</span>
+
+plt<span style="color:#666">.</span>subplot(<span style="color:#666">211</span>)
+plt<span style="color:#666">.</span>subplots_adjust(wspace<span style="color:#666">=</span><span style="color:#666">0.5</span>, hspace<span style="color:#666">=</span><span style="color:#666">0.75</span>);
+plt<span style="color:#666">.</span>plot(xvalues_small, polarity_ave_small, <span style="color:#ba2121">&#39;g-&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>fill_between(xvalues_small, <span style="color:#666">0</span>, polarity_ave_small, facecolor<span style="color:#666">=</span><span style="color:#ba2121">&#39;green&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>axis([<span style="color:#666">0</span>, <span style="color:#666">100</span>, <span style="color:#666">-</span><span style="color:#666">0.75</span>, <span style="color:#666">0.75</span>])
+plt<span style="color:#666">.</span>axhline(y<span style="color:#666">=</span><span style="color:#666">0</span>, xmin<span style="color:#666">=</span><span style="color:#666">0</span>, xmax<span style="color:#666">=</span><span style="color:#666">100</span>)
+plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Sentiment Polarity&#39;</span>)
+plt<span style="color:#666">.</span>title(<span style="color:#ba2121">&#39;Running Average with N = 5&#39;</span>)
+
+plt<span style="color:#666">.</span>subplot(<span style="color:#666">212</span>)
+plt<span style="color:#666">.</span>plot(xvalues, polarity_ave, <span style="color:#ba2121">&#39;g-&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>fill_between(xvalues, <span style="color:#666">0</span>, polarity_ave, facecolor<span style="color:#666">=</span><span style="color:#ba2121">&#39;green&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>axis([<span style="color:#666">0</span>, <span style="color:#666">100</span>, <span style="color:#666">-</span><span style="color:#666">0.75</span>, <span style="color:#666">0.75</span>])
+plt<span style="color:#666">.</span>axhline(y<span style="color:#666">=</span><span style="color:#666">0</span>, xmin<span style="color:#666">=</span><span style="color:#666">0</span>, xmax<span style="color:#666">=</span><span style="color:#666">100</span>)
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Percent of Novel&#39;</span>), plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Sentiment Polarity (averaged)&#39;</span>)
+plt<span style="color:#666">.</span>title(<span style="color:#ba2121">&#39;Running Average with N = 60&#39;</span>)</code></pre></div>
+<p><img src="/images/green_gables/output_14_1.png" alt="png" /></p>
+
+<p>The top plot is using a running average with a small window (averaging over a small number of sentences) and is essentially the &ldquo;raw&rdquo; sentiment of the novel, showing how sentiment changes over short time scales. There are a lot of positive and negative spikes but we can start to see a little bit of a pattern when looking at the lower frequencies or longer time scales.</p>
+
+<p>The bottom plot with with a running average window of 60 sentences and it is now much easier to see changes in sentiment that happen over longer time intervals. There are definite high and low periods that were not averaged away. The magnitude of the sentiment decreased because of the averaging but since we are looking at relative changes over the course of the novel, the absolute scale shouldn&rsquo;t matter.</p>
+
+<p>To take a closer look at events in the novel, we&rsquo;ll split the novel in half and plot each part separately. We can also annotate the plot with what is happening in the novel. Because you were dying to know what all the positive and negative parts were, right?</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Make a string with the anne-otations to be added to the plot below</span>
+text <span style="color:#666">=</span> [<span style="color:#ba2121">&#39;Anne is not a boy&#39;</span>,<span style="color:#ba2121">&#39;Anne yells at Mrs. Lynde&#39;</span>,<span style="color:#ba2121">&#39;Anne meets Diana&#39;</span>,<span style="color:#ba2121">&#39;Diana gets drunk&#39;</span>,<span style="color:#ba2121">&#39;No more Diana!&#39;</span>]
+text<span style="color:#666">.</span>extend([<span style="color:#ba2121">&#39;Haunted woods &amp; Mr. Phillips departs&#39;</span>,<span style="color:#ba2121">&#39;Anne</span><span style="color:#b62;font-weight:bold">\&#39;</span><span style="color:#ba2121">s Broken ankle&#39;</span>,<span style="color:#ba2121">&#39;Miss Stacey!&#39;</span>,<span style="color:#ba2121">&#39;Charlottetown trip&#39;</span>])
+text<span style="color:#666">.</span>extend([<span style="color:#ba2121">&#39;Miss Stacey leaves&#39;</span>,<span style="color:#ba2121">&#39;Anne wins the Avery&#39;</span>])
+
+<span style="color:#408080;font-style:italic"># Make more strings with the position of the text and arrows</span>
+xy_pos <span style="color:#666">=</span> [(<span style="color:#666">7.3</span>,<span style="color:#666">-</span><span style="color:#666">0.08</span>),(<span style="color:#666">22.5</span>,<span style="color:#666">-</span><span style="color:#666">0.18</span>),(<span style="color:#666">28.44</span>,<span style="color:#666">0.25</span>),(<span style="color:#666">42.28</span>,<span style="color:#666">0.25</span>),(<span style="color:#666">43.5</span>,<span style="color:#666">-</span><span style="color:#666">0.175</span>)]
+xytext_pos <span style="color:#666">=</span> [(<span style="color:#666">6.8</span>,<span style="color:#666">-</span><span style="color:#666">0.2</span>),(<span style="color:#666">24</span>,<span style="color:#666">-</span><span style="color:#666">0.25</span>),(<span style="color:#666">24</span>,<span style="color:#666">0.4</span>),(<span style="color:#666">43</span>,<span style="color:#666">0.4</span>),(<span style="color:#666">44</span>,<span style="color:#666">-</span><span style="color:#666">0.25</span>)]
+
+xy_pos<span style="color:#666">.</span>extend([(<span style="color:#666">55.7</span>,<span style="color:#666">-</span><span style="color:#666">0.18</span>),(<span style="color:#666">61.75</span>,<span style="color:#666">-</span><span style="color:#666">0.12</span>),(<span style="color:#666">63.4</span>,<span style="color:#666">0.375</span>),(<span style="color:#666">77</span>,<span style="color:#666">0.3</span>),(<span style="color:#666">84.33</span>,<span style="color:#666">-</span><span style="color:#666">0.13</span>),(<span style="color:#666">92.79</span>,<span style="color:#666">0.3</span>)])
+xytext_pos<span style="color:#666">.</span>extend([(<span style="color:#666">56.5</span>,<span style="color:#666">-</span><span style="color:#666">0.25</span>),(<span style="color:#666">62</span>,<span style="color:#666">-</span><span style="color:#666">0.25</span>),(<span style="color:#666">64.75</span>,<span style="color:#666">0.4</span>),(<span style="color:#666">73</span>,<span style="color:#666">0.4</span>),(<span style="color:#666">81</span>,<span style="color:#666">-</span><span style="color:#666">0.25</span>),(<span style="color:#666">93</span>,<span style="color:#666">0.45</span>)])</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">rcParams[<span style="color:#ba2121">&#39;figure.figsize&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">16</span>, <span style="color:#666">8</span>
+
+plt<span style="color:#666">.</span>subplot(<span style="color:#666">211</span>)
+plt<span style="color:#666">.</span>plot(xvalues, polarity_ave, <span style="color:#ba2121">&#39;g-&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>fill_between(xvalues, <span style="color:#666">0</span>, polarity_ave, facecolor<span style="color:#666">=</span><span style="color:#ba2121">&#39;green&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>axis([<span style="color:#666">0</span>, <span style="color:#666">50</span>, <span style="color:#666">-</span><span style="color:#666">0.3</span>, <span style="color:#666">0.5</span>])
+plt<span style="color:#666">.</span>axhline(y<span style="color:#666">=</span><span style="color:#666">0</span>, xmin<span style="color:#666">=</span><span style="color:#666">0</span>, xmax<span style="color:#666">=</span><span style="color:#666">50</span>)
+plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Sentiment Polarity (averaged)&#39;</span>)
+plt<span style="color:#666">.</span>title(<span style="color:#ba2121">&#39;Running Average with N = 60&#39;</span>)
+
+<span style="color:#008000;font-weight:bold">for</span> i <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">0</span>,<span style="color:#666">5</span>):
+    plt<span style="color:#666">.</span>annotate(text[i], xy<span style="color:#666">=</span>xy_pos[i], xytext<span style="color:#666">=</span>xytext_pos[i], arrowprops<span style="color:#666">=</span>{<span style="color:#ba2121">&#39;arrowstyle&#39;</span>: <span style="color:#ba2121">&#39;-&#39;</span>}, va<span style="color:#666">=</span><span style="color:#ba2121">&#39;center&#39;</span>)
+
+plt<span style="color:#666">.</span>subplot(<span style="color:#666">212</span>)
+plt<span style="color:#666">.</span>plot(xvalues, polarity_ave, <span style="color:#ba2121">&#39;g-&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>fill_between(xvalues, <span style="color:#666">0</span>, polarity_ave, facecolor<span style="color:#666">=</span><span style="color:#ba2121">&#39;green&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Percent of Novel&#39;</span>),plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Sentiment Polarity (averaged)&#39;</span>)
+plt<span style="color:#666">.</span>axis([<span style="color:#666">50</span>, <span style="color:#666">100</span>, <span style="color:#666">-</span><span style="color:#666">0.3</span>, <span style="color:#666">0.5</span>])
+plt<span style="color:#666">.</span>axhline(y<span style="color:#666">=</span><span style="color:#666">0</span>, xmin<span style="color:#666">=</span><span style="color:#666">50</span>, xmax<span style="color:#666">=</span><span style="color:#666">100</span>)
+
+<span style="color:#008000;font-weight:bold">for</span> i <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">6</span>,<span style="color:#666">11</span>):
+    plt<span style="color:#666">.</span>annotate(text[i], xy<span style="color:#666">=</span>xy_pos[i], xytext<span style="color:#666">=</span>xytext_pos[i], arrowprops<span style="color:#666">=</span>{<span style="color:#ba2121">&#39;arrowstyle&#39;</span>: <span style="color:#ba2121">&#39;-&#39;</span>}, va<span style="color:#666">=</span><span style="color:#ba2121">&#39;center&#39;</span>)</code></pre></div>
+<p><img src="/images/green_gables/output_17_0.png" alt="png" /></p>
+
+<p>The parts of the novel that a reader would likely identify as positive (new best friend, lovely new teacher, winning a scholarship) are the parts with the highest sentiment polarity. And the parts of the novel that are more negative (yelling at someone, missing a best friend, injury, and sickness) are t!e sections with the most negative sentiment. It looks like VADER did a pretty good job with this text.</p>
+
+<p>Let&rsquo;s take a look at another sentiment classifier and how the results compare to VADER. There is a handy text processing library called <a href="https://textblob.readthedocs.io/en/dev/">TextBlob</a> that makes it much easier to implement many of the functions available in the NLTK. The default sentiment classifier used by TextBlob is the <a href="http://www.clips.ua.ac.be/pattern">PatternAnalyzer</a>. The TextBlob module needs to be installed before you can use the functions.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># TextBlob</span>
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">textblob</span> <span style="color:#008000;font-weight:bold">import</span> TextBlob
+
+<span style="color:#408080;font-style:italic"># Use the TextBlob to tokenize the raw string and make a textblob object</span>
+anne_blob <span style="color:#666">=</span> TextBlob(raw_string)
+
+<span style="color:#408080;font-style:italic"># Determine the sentiment using the PatternAnalyzer (based on the pattern library)</span>
+blob_sentiment <span style="color:#666">=</span> [sentence<span style="color:#666">.</span>sentiment<span style="color:#666">.</span>polarity <span style="color:#008000;font-weight:bold">for</span> sentence <span style="color:#a2f;font-weight:bold">in</span> anne_blob<span style="color:#666">.</span>sentences]</code></pre></div>
+<p>And then we can plot the sentiment as a function of sentence index.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Plot the polarity of the sentiment as a function of sentence number in the text.</span>
+rcParams[<span style="color:#ba2121">&#39;figure.figsize&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">14</span>, <span style="color:#666">4</span>
+plt<span style="color:#666">.</span>plot(blob_sentiment,<span style="color:#ba2121">&#39;b.&#39;</span>)
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Sentence Index&#39;</span>), plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Sentiment Polarity&#39;</span>)
+xmax <span style="color:#666">=</span> <span style="color:#008000">len</span>(blob_sentiment)
+plt<span style="color:#666">.</span>axis([<span style="color:#666">0</span>, xmax, <span style="color:#666">-</span><span style="color:#666">1.10</span>, <span style="color:#666">1.10</span>])</code></pre></div>
+<p><img src="/images/green_gables/output_21_1.png" alt="png" /></p>
+
+<p>The sentiment values from the PatternAnalyzer classifier looks similar to those determined by VADER. The sentiment is overall more positive than negative and tends toward more positive values near the end of novel. The polarity values also tend to cluster at 0.5, 1.0, and -1.0; I&rsquo;m not quite sure what is causing that.</p>
+
+<p>In order to better compare the two sentiment classifiers, I&rsquo;ll make another plot. But first, the TextBlob sentiment also needs to be averaged using the same method applied to the VADER sentiment values. Then come the plots!</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Calculate a new list (vector) of polarity values, averaged over the window N = 60</span>
+blob_ave <span style="color:#666">=</span> running_mean(blob_sentiment, <span style="color:#666">60</span>)
+
+<span style="color:#408080;font-style:italic"># Create a vector of values for the x-axis as a percentage of the novel</span>
+xvalues_blob <span style="color:#666">=</span> [index<span style="color:#666">*</span><span style="color:#666">100</span><span style="color:#666">/</span><span style="color:#008000">len</span>(blob_ave) <span style="color:#008000;font-weight:bold">for</span> index <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#008000">len</span>(blob_ave))]</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Plot the sentiment for each classifier</span>
+rcParams[<span style="color:#ba2121">&#39;figure.figsize&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">16</span>, <span style="color:#666">8</span>
+
+plt<span style="color:#666">.</span>subplot(<span style="color:#666">211</span>)
+plt<span style="color:#666">.</span>plot(xvalues, polarity_ave, <span style="color:#ba2121">&#39;g-&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>fill_between(xvalues, <span style="color:#666">0</span>, polarity_ave, facecolor<span style="color:#666">=</span><span style="color:#ba2121">&#39;green&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>axis([<span style="color:#666">0</span>, <span style="color:#666">100</span>, <span style="color:#666">-</span><span style="color:#666">0.3</span>, <span style="color:#666">0.4</span>])
+plt<span style="color:#666">.</span>axhline(y<span style="color:#666">=</span><span style="color:#666">0</span>, xmin<span style="color:#666">=</span><span style="color:#666">0</span>, xmax<span style="color:#666">=</span><span style="color:#666">100</span>)
+plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Sentiment Polarity (averaged)&#39;</span>)
+plt<span style="color:#666">.</span>title(<span style="color:#ba2121">&#39;VADER Sentiment (running average window = 60)&#39;</span>)
+
+plt<span style="color:#666">.</span>subplot(<span style="color:#666">212</span>)
+plt<span style="color:#666">.</span>plot(xvalues_blob, blob_ave, <span style="color:#ba2121">&#39;g-&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>fill_between(xvalues_blob, <span style="color:#666">0</span>, blob_ave, facecolor<span style="color:#666">=</span><span style="color:#ba2121">&#39;green&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Percent of Novel&#39;</span>),plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Sentiment Polarity (averaged)&#39;</span>)
+plt<span style="color:#666">.</span>axis([<span style="color:#666">0</span>, <span style="color:#666">100</span>, <span style="color:#666">-</span><span style="color:#666">0.3</span>, <span style="color:#666">0.4</span>])
+plt<span style="color:#666">.</span>axhline(y<span style="color:#666">=</span><span style="color:#666">0</span>, xmin<span style="color:#666">=</span><span style="color:#666">0</span>, xmax<span style="color:#666">=</span><span style="color:#666">100</span>)
+plt<span style="color:#666">.</span>title(<span style="color:#ba2121">&#39;TextBlob/Pattern Sentiment (running average window = 60)&#39;</span>)</code></pre></div>
+<p><img src="/images/green_gables/output_24_1.png" alt="png" /></p>
+
+<p>The results look reasonably similar but there are some notable differences. First, using VADER, there is a big dip into negative sentiments when Anne yells at Mrs. Lynde - that is the first time that anything really negative happens in the novel. The PatternAnalyzer almost completely misses it, with only a small dip in sentiment about a quarter of the way through the novel. In general, VADER picks up more negative sentiment overall than PatternAnalyzer. This would certainly be something to examine further.</p>
+
+<p>There are many other interesting things to analyze: sentence length, word length, word frequency, and other sentiment classifiers. We&rsquo;ll look at just a couple of them now. First, let&rsquo;s take a look at a histogram of sentence length, as determined by the number of characters in a sentence. These types of histograms would be interesting to compare for the rest of the books in the <em>Anne</em> series in addition to the other work by Montgomery. Using sentences of different lengths adds variety and interest to a piece of writing and different authors have different distributions of sentence length.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Make a histogram of sentence lengths (in this case, the number of characters per sentence)</span>
+sen_length <span style="color:#666">=</span> [<span style="color:#008000">len</span>(sentence) <span style="color:#008000;font-weight:bold">for</span> sentence <span style="color:#a2f;font-weight:bold">in</span> sentences]
+
+plt<span style="color:#666">.</span>hist(sen_length, bins<span style="color:#666">=</span><span style="color:#666">150</span>)
+plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Number&#39;</span>), plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Sentence Length (characters)&#39;</span>)
+plt<span style="color:#666">.</span>title(<span style="color:#ba2121">&#39;Anne of Green Gables&#39;</span>)</code></pre></div>
+<p><img src="/images/green_gables/output_26_1.png" alt="png" /></p>
+
+<p>We can also look at how sentence length compares to the sentiment. Do longer sentences tend to be positive or negative? Will there be any correlation at all between sentence length and sentiment? Let&rsquo;s find out.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Plot the sentiment score as a function of sentence length</span>
+
+plt<span style="color:#666">.</span>plot(sen_length, polarity,<span style="color:#ba2121">&#39;b.&#39;</span>)
+plt<span style="color:#666">.</span>axis([<span style="color:#666">0</span>, <span style="color:#666">450</span>, <span style="color:#666">-</span><span style="color:#666">1.0</span>, <span style="color:#666">1.0</span>])
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Sentence Length (number of characters)&#39;</span>)
+plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Sentiment Polarity&#39;</span>)
+plt<span style="color:#666">.</span>title(<span style="color:#ba2121">&#39;Sentiment as a Function of Sentence Length&#39;</span>)</code></pre></div>
+<p><img src="/images/green_gables/output_28_1.png" alt="png" /></p>
+
+<p>There doesn&rsquo;t seem to be too much here. There is again a trend toward sentences of all length being more positive, but we already saw that in the other plots.</p>
+
+<h3 id="more-to-come">More to Come!</h3>
+
+<p>Overall, the sentiment analysis of <em>Anne of Green Gables</em> was a success! I am actually pleasantly suprised at how well the sentiment changes were captured over the whole novel. This is just the start of analyzing Montgomery&rsquo;s writing, so please check back in to read more.</p>
+
+
+
+      </main>
+    </div>
+    
+<footer id="footer" class="mt-auto text-center text-muted">
+  <div class="container">
+    Made with <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/zwbetz-gh/vanilla-bootstrap-hugo-theme">Vanilla</a>
+  </div>
+</footer>
+
+    <script src="https://www.nicolew.xyz/js/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>
+
+
+    
+  
+
+  </body>
+</html>

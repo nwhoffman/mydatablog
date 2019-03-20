@@ -1,16 +1,68 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-	
-	<sitemap>
-	   	<loc>https://nicolew.xyz/en/sitemap.xml</loc>
-		
-	   	<lastmod>2019-03-14T00:00:00+00:00</lastmod>
-		
-	</sitemap>
-	
-	<sitemap>
-	   	<loc>https://nicolew.xyz/fr/sitemap.xml</loc>
-		
-	</sitemap>
-	
-</sitemapindex>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://www.nicolew.xyz/posts/kilauea_bokeh/</loc>
+    <lastmod>2019-03-14T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.nicolew.xyz/posts/earthquakes_stats2/</loc>
+    <lastmod>2018-04-14T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.nicolew.xyz/posts/earthquake_stats1/</loc>
+    <lastmod>2018-03-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.nicolew.xyz/posts/gilmore_girls_rank/</loc>
+    <lastmod>2016-11-21T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.nicolew.xyz/posts/green_gables_sentiment/</loc>
+    <lastmod>2016-11-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.nicolew.xyz/about/</loc>
+  </url>
+  
+  <url>
+    <loc>https://www.nicolew.xyz/resume/</loc>
+  </url>
+  
+  <url>
+    <loc>https://www.nicolew.xyz/tags/earthquakes/</loc>
+    <lastmod>2019-03-14T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.nicolew.xyz/</loc>
+    <lastmod>2019-03-14T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.nicolew.xyz/tags/nlp/</loc>
+    <lastmod>2016-11-21T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.nicolew.xyz/posts/</loc>
+    <lastmod>2019-03-14T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.nicolew.xyz/tags/</loc>
+    <lastmod>2019-03-14T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+</urlset>

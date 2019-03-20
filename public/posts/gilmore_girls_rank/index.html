@@ -1,0 +1,341 @@
+<!doctype html>
+
+<html lang="en" class="h-100">
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="generator" content="Hugo 0.54.0" />
+  <link rel="stylesheet" href="https://www.nicolew.xyz/css/bootstrap.min.css">
+  
+  
+  <title>An Analysis of Gilmore Girls Rankings | Nicole W</title>
+  <style>
+.container {
+  max-width: 700px;
+}
+#nav a {
+  font-weight: bold;
+  color: inherit;
+}
+#nav a.nav-link-active {
+  background-color: #212529;
+  color: #fff;
+}
+#nav-border {
+  border-bottom: 1px solid #212529;
+}
+#main {
+  margin-top: 1em;
+  margin-bottom: 4em;
+}
+#home-jumbotron {
+  background-color: inherit;
+}
+#footer .container {
+  padding: 1em 0;
+}
+#footer a {
+  color: inherit;
+  text-decoration: underline;
+}
+.font-125 {
+  font-size: 125%;
+}
+.tag-btn {
+  margin-bottom: 0.3em;
+}
+pre {
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 16px;
+}
+pre code {
+  padding: 0;
+  font-size: inherit;
+  color: inherit; 
+  background-color: transparent;
+  border-radius: 0;
+}
+code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #c7254e;
+  background-color: #f9f2f4;
+  border-radius: 4px;
+}
+img,
+iframe,
+embed,
+video,
+audio {
+  max-width: 100%;
+}
+</style>
+</head>
+  <body class="d-flex flex-column h-100">
+    <div id="nav-border" class="container">
+  <nav id="nav" class="nav justify-content-center">
+  
+  
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/"><i data-feather="home"></i> Home</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/posts/"><i data-feather="edit"></i> Blog</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/tags/"><i data-feather="tag"></i> Tags</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/about/"><i data-feather="smile"></i> About</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/index.xml"><i data-feather="rss"></i> RSS</a>
+  
+  </nav>
+</div>
+    <div class="container">
+      <main id="main">
+        
+
+<h1>An Analysis of Gilmore Girls Rankings</h1>
+
+
+<p>With the premier of the older and wiser Gilmore Girls just days away, I thought it would be fun to take a look at the original 153 episodes of the show. I am by no means an expert on the series, or even a huge fan, but I did watch it semi-regularly when it originally aired and re-watched most of the the series earlier this year. I was inspired to do this analysis after coming across some rankings for every single episode. So grab the poptarts and coffee and we can get started!</p>
+
+<h3 id="the-rankings">The Rankings</h3>
+
+<p>The rankings come from a couple of different sources. Two were complied by writers for their websites, <a href="http://www.vox.com/culture/2016/11/14/13034530/gilmore-girls-every-episode-ranked">Vox</a> and <a href="https://www.pastemagazine.com/articles/2016/11/every-episode-of-gilmore-girls-ranked-all-153-of-e.html">Paste Magazine</a>. One is from a <a href="https://www.buzzfeed.com/janinelhaines/ultimate-ranking-of-the-gilmore-girls-episodes-1jehh">Buzz Feed community member</a> and one is from a blogger at <a href="https://hauntedcoconut.wordpress.com/2016/11/15/gilmore-girls-every-episode-ranked/">The Haunted Coconut</a>. So there is a range of sources, from paid writers to individuals who are really interested in, and presumably somewhat knowledgeable about, the show.</p>
+
+<p>First, we need the data. <a href="https://en.wikipedia.org/wiki/Gilmore_Girls">Wikipedia</a> has a lot of information, including episode titles, writers, directors, air dates, and viewing numbers. For this initial look at the rankings, I didn&rsquo;t really need the other data but it is available <a href="https://nwhoffman.github.io/static/data_sets/gilmore_girls.csv">here</a> if you want to download and play around with the numbers.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">__future__</span> <span style="color:#008000;font-weight:bold">import</span> division
+
+<span style="color:#408080;font-style:italic"># Import pandas and load the data as a data frame.</span>
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">pandas</span> <span style="color:#008000;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">pd</span>
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">numpy</span> <span style="color:#008000;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">np</span>
+
+df <span style="color:#666">=</span> pd<span style="color:#666">.</span>read_csv(<span style="color:#ba2121">&#39;/ipynb/gilmore/gilmore_girls.csv&#39;</span>, header<span style="color:#666">=</span><span style="color:#666">0</span>)
+
+<span style="color:#408080;font-style:italic"># Import matplotlib</span>
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">matplotlib.pyplot</span> <span style="color:#008000;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">plt</span>
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">pylab</span> <span style="color:#008000;font-weight:bold">import</span> rcParams</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#666">%</span>matplotlib inline
+
+<span style="color:#408080;font-style:italic"># Use the matplotlib style sheets</span>
+plt<span style="color:#666">.</span>style<span style="color:#666">.</span>use(<span style="color:#ba2121">&#39;fivethirtyeight&#39;</span>)
+
+<span style="color:#408080;font-style:italic"># Lists to set season positions, rank titles, colors, etc.</span>
+sea_num <span style="color:#666">=</span> [<span style="color:#666">0</span>, <span style="color:#666">22</span>, <span style="color:#666">44</span>, <span style="color:#666">66</span>, <span style="color:#666">88</span>, <span style="color:#666">110</span>, <span style="color:#666">132</span>, <span style="color:#666">153</span>, <span style="color:#666">153</span>]
+transp <span style="color:#666">=</span> np<span style="color:#666">.</span>arange(<span style="color:#666">0.05</span>,<span style="color:#666">0.40</span>,<span style="color:#666">0.05</span>)
+mycolor <span style="color:#666">=</span> [<span style="color:#ba2121">&#39;b&#39;</span>, <span style="color:#ba2121">&#39;g&#39;</span>, <span style="color:#ba2121">&#39;m&#39;</span>, <span style="color:#ba2121">&#39;c&#39;</span>]
+rank_name <span style="color:#666">=</span> [<span style="color:#ba2121">&#39;Vox&#39;</span>, <span style="color:#ba2121">&#39;Paste&#39;</span>, <span style="color:#ba2121">&#39;Buzz&#39;</span>, <span style="color:#ba2121">&#39;Coconut&#39;</span>]
+
+fig, ax <span style="color:#666">=</span> plt<span style="color:#666">.</span>subplots(nrows<span style="color:#666">=</span><span style="color:#666">2</span>, ncols<span style="color:#666">=</span><span style="color:#666">2</span>, figsize<span style="color:#666">=</span>(<span style="color:#666">12</span>, <span style="color:#666">8</span>))
+plt<span style="color:#666">.</span>subplots_adjust(wspace<span style="color:#666">=</span><span style="color:#666">0.27</span>, hspace<span style="color:#666">=</span><span style="color:#666">0.38</span>);
+
+<span style="color:#008000;font-weight:bold">for</span> i <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">4</span>):
+    temp<span style="color:#666">=</span><span style="color:#666">221</span><span style="color:#666">+</span>i <span style="color:#408080;font-style:italic">#temporary variable for the subplot position</span>
+    plt<span style="color:#666">.</span>subplot(temp)
+    plt<span style="color:#666">.</span>plot(df[<span style="color:#ba2121">&#39;No. in series&#39;</span>], df[rank_name[i]], linestyle<span style="color:#666">=</span><span style="color:#ba2121">&#39;None&#39;</span>, marker<span style="color:#666">=</span><span style="color:#ba2121">&#39;o&#39;</span>, 
+             color<span style="color:#666">=</span>mycolor[i], markersize<span style="color:#666">=</span><span style="color:#666">10</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>)
+    
+    plt<span style="color:#666">.</span>axis((<span style="color:#666">-</span><span style="color:#666">5</span>,<span style="color:#666">160</span>,<span style="color:#666">160</span>,<span style="color:#666">-</span><span style="color:#666">5</span>)), plt<span style="color:#666">.</span>grid(axis<span style="color:#666">=</span><span style="color:#ba2121">&#39;x&#39;</span>, )
+    plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Episode Number (series)&#39;</span>), plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Rank&#39;</span>)
+    plt<span style="color:#666">.</span>title(rank_name[i])
+
+    <span style="color:#008000;font-weight:bold">for</span> j <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">0</span>,<span style="color:#666">7</span>):
+        plt<span style="color:#666">.</span>axvspan(sea_num[j], sea_num[j<span style="color:#666">+</span><span style="color:#666">1</span>], alpha<span style="color:#666">=</span>transp[j], color<span style="color:#666">=</span><span style="color:#ba2121">&#39;purple&#39;</span>)</code></pre></div>
+<p><img src="/images/gilmore_girls/output_2_0.png" alt="png" /></p>
+
+<p>The four different rankings are plotted as a function of the episode number (from 1 to 153). The lower the rank, the better the episode. The seasons are represented by the purple shading, going from light purple for Season 1 to darker for Season 7. This was not intended to represent the overall tone of the seasons, but Season 7 certainly has a greater number of lower rankings so it seems fitting.</p>
+
+<p>What can we see in these rankings? The authors definitely agree that Season 7 wasn&rsquo;t as good as the other seasons; those early episodes started off pretty bad but did improve near the very end of the series. Season 4 also didn&rsquo;t have a lot of top ranked episodes, with very few making it into the top 20. But there is a lot of variation for most of the episode rankings, which is good.</p>
+
+<p>So how do these different rankings compare to each other? Let&rsquo;s average them together, find the standard deviation, and make another plot. I think Rory would like all these plots, right?</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Average over the rankings and add new columns to the dataframe</span>
+df[<span style="color:#ba2121">&#39;avg&#39;</span>] <span style="color:#666">=</span> df[[<span style="color:#ba2121">&#39;Vox&#39;</span>, <span style="color:#ba2121">&#39;Paste&#39;</span>, <span style="color:#ba2121">&#39;Buzz&#39;</span>, <span style="color:#ba2121">&#39;Coconut&#39;</span>]]<span style="color:#666">.</span>mean(axis<span style="color:#666">=</span><span style="color:#666">1</span>)
+df[<span style="color:#ba2121">&#39;std&#39;</span>] <span style="color:#666">=</span> df[[<span style="color:#ba2121">&#39;Vox&#39;</span>, <span style="color:#ba2121">&#39;Paste&#39;</span>, <span style="color:#ba2121">&#39;Buzz&#39;</span>, <span style="color:#ba2121">&#39;Coconut&#39;</span>]]<span style="color:#666">.</span>std(axis<span style="color:#666">=</span><span style="color:#666">1</span>)</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">rcParams[<span style="color:#ba2121">&#39;figure.figsize&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">12</span>, <span style="color:#666">6</span>
+
+plt<span style="color:#666">.</span>plot(df[<span style="color:#ba2121">&#39;No. in series&#39;</span>], df[<span style="color:#ba2121">&#39;Vox&#39;</span>],<span style="color:#ba2121">&#39;b.&#39;</span>)
+plt<span style="color:#666">.</span>plot(df[<span style="color:#ba2121">&#39;No. in series&#39;</span>], df[<span style="color:#ba2121">&#39;Paste&#39;</span>],<span style="color:#ba2121">&#39;g.&#39;</span>)
+plt<span style="color:#666">.</span>plot(df[<span style="color:#ba2121">&#39;No. in series&#39;</span>], df[<span style="color:#ba2121">&#39;Buzz&#39;</span>],<span style="color:#ba2121">&#39;m.&#39;</span>)
+plt<span style="color:#666">.</span>plot(df[<span style="color:#ba2121">&#39;No. in series&#39;</span>], df[<span style="color:#ba2121">&#39;Coconut&#39;</span>],<span style="color:#ba2121">&#39;c.&#39;</span>)
+plt<span style="color:#666">.</span>errorbar(df[<span style="color:#ba2121">&#39;No. in series&#39;</span>], df[<span style="color:#ba2121">&#39;avg&#39;</span>], df[<span style="color:#ba2121">&#39;std&#39;</span>]<span style="color:#666">/</span><span style="color:#666">2.</span>, 
+             linestyle<span style="color:#666">=</span><span style="color:#ba2121">&#39;None&#39;</span>, marker<span style="color:#666">=</span><span style="color:#ba2121">&#39;o&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>, color<span style="color:#666">=</span><span style="color:#ba2121">&#39;purple&#39;</span>, label<span style="color:#666">=</span><span style="color:#ba2121">&#39;average with std/2&#39;</span>)
+
+<span style="color:#008000;font-weight:bold">for</span> i <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">0</span>,<span style="color:#666">7</span>):
+    plt<span style="color:#666">.</span>axvspan(sea_num[i], sea_num[i<span style="color:#666">+</span><span style="color:#666">1</span>], alpha<span style="color:#666">=</span>transp[i], color<span style="color:#666">=</span><span style="color:#ba2121">&#39;purple&#39;</span>)
+    
+plt<span style="color:#666">.</span>axis((<span style="color:#666">1</span>,<span style="color:#666">155</span>,<span style="color:#666">160</span>,<span style="color:#666">1</span>))
+plt<span style="color:#666">.</span>grid(axis<span style="color:#666">=</span><span style="color:#ba2121">&#39;x&#39;</span>)
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Episode Number (series)&#39;</span>), plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Rank&#39;</span>)
+plt<span style="color:#666">.</span>legend(loc<span style="color:#666">=</span><span style="color:#666">9</span>, bbox_to_anchor<span style="color:#666">=</span>(<span style="color:#666">0.5</span>, <span style="color:#666">-</span><span style="color:#666">0.15</span>), ncol<span style="color:#666">=</span><span style="color:#666">6</span>, numpoints<span style="color:#666">=</span><span style="color:#666">1</span>)</code></pre></div>
+<p><img src="/images/gilmore_girls/output_5_1.png" alt="png" /></p>
+
+<p>All of the rankings along with their average standard deviation are plotted here. I divided the standard deviation by two since it was kind of large and would have overwhelmed the plot, but you can still get an idea of how much relative variation there is.</p>
+
+<p>There are some interesting features that can be pointed out.  A few episodes stand out as great for all four sets of rankings: <em>The Bracebridge Dinner</em> (season 2, episode 10), <em>Raincoats and Recipes</em> (season 4, episode 22), and <em>Wedding Bell Blues</em> (season 5, episode 13).</p>
+
+<p>On the lower ranked side of things, <em>Here Comes the Son</em> (season 3, episode 21) is disliked by all four of the ranking authors and really stands out as the worst episode in Season 3. I wouldn&rsquo;t be surprised to find that episode on the bottom of most people&rsquo;s lists; it was intended as the pilot for a spin-off series about Jess. Guess that didn&rsquo;t work out too well.</p>
+
+<h4 id="season-7-well-at-least-it-got-better">Season 7: Well, at least it got better.</h4>
+
+<p>And now we come to Season 7. There is an obvious cluster of low ranked episodes with small deviations. It&rsquo;s no surprise to fans of the show that season 7 didn&rsquo;t get off to a great start. The main writers left and the show struggled to find a, well, plot. The first two episodes, <em>The Long Morrow</em> and <em>That&rsquo;s What You Get, Folks, for Makin&rsquo; Whoopee</em>, have the two lowest average rankings. The less said about these episodes, the better. There are lots of reviews on the interwebs, so I won&rsquo;t link any specific ones here. At least things begin to look up towards the end of the series, with a nice steady climb to a decently ranked series finale.</p>
+
+<h3 id="best-and-worst-episodes">Best and Worst Episodes</h3>
+
+<p>Let&rsquo;s take a quick look at how the standard deviation depends on the average rank. This can help us to see if there is actually any agreement on the best and worst episode rankings.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Standard deviation as a function of rank</span>
+plt<span style="color:#666">.</span>style<span style="color:#666">.</span>use(<span style="color:#ba2121">&#39;fivethirtyeight&#39;</span>)
+rcParams[<span style="color:#ba2121">&#39;figure.figsize&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">10</span>, <span style="color:#666">6</span>
+
+columns <span style="color:#666">=</span> [<span style="color:#ba2121">&#39;Season 1&#39;</span>, <span style="color:#ba2121">&#39;Season 2&#39;</span>, <span style="color:#ba2121">&#39;Season 3&#39;</span>, <span style="color:#ba2121">&#39;Season 4&#39;</span>, <span style="color:#ba2121">&#39;Season 5&#39;</span>, <span style="color:#ba2121">&#39;Season 6&#39;</span>, <span style="color:#ba2121">&#39;Season 7&#39;</span>]
+ggcolor <span style="color:#666">=</span> [<span style="color:#ba2121">&#39;r&#39;</span>, <span style="color:#ba2121">&#39;orange&#39;</span>, <span style="color:#ba2121">&#39;y&#39;</span>, <span style="color:#ba2121">&#39;g&#39;</span>, <span style="color:#ba2121">&#39;c&#39;</span>, <span style="color:#ba2121">&#39;b&#39;</span>, <span style="color:#ba2121">&#39;purple&#39;</span>]
+
+<span style="color:#008000;font-weight:bold">for</span> i <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">1</span>,<span style="color:#666">8</span>):
+    plt<span style="color:#666">.</span>plot(df[df[<span style="color:#ba2121">&#39;Season&#39;</span>] <span style="color:#666">==</span> i][<span style="color:#ba2121">&#39;avg&#39;</span>], df[df[<span style="color:#ba2121">&#39;Season&#39;</span>] <span style="color:#666">==</span> i][<span style="color:#ba2121">&#39;std&#39;</span>], linestyle<span style="color:#666">=</span><span style="color:#ba2121">&#39;None&#39;</span>, marker<span style="color:#666">=</span><span style="color:#ba2121">&#39;o&#39;</span>, 
+             color<span style="color:#666">=</span>ggcolor[i<span style="color:#666">-</span><span style="color:#666">1</span>], label<span style="color:#666">=</span>columns[i<span style="color:#666">-</span><span style="color:#666">1</span>])
+
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Average Episode Rank&#39;</span>), plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Standard Deviation&#39;</span>)
+plt<span style="color:#666">.</span>legend(loc<span style="color:#666">=</span><span style="color:#666">9</span>, bbox_to_anchor<span style="color:#666">=</span>(<span style="color:#666">0.5</span>, <span style="color:#666">-</span><span style="color:#666">0.15</span>), ncol<span style="color:#666">=</span><span style="color:#666">4</span>, numpoints<span style="color:#666">=</span><span style="color:#666">1</span>, fontsize<span style="color:#666">=</span><span style="color:#666">16</span>)</code></pre></div>
+<p><img src="/images/gilmore_girls/output_7_1.png" alt="png" /></p>
+
+<p>We can see that the standard deviation is relatively low for the higest ranked episodes, especially those in the top 40. The authors of the ranking lists appear to agree on what the best episodes are. This makes sense; most people would probably have an easier time identifying the best shows in a series since what makes an episode &ldquo;good&rdquo; might be more agreed upon. There are also relatively smaller standard deviations for the lower ranked episodes but the trend is not as clear here. I think it would be more difficult to pinpoint what makes an episode &ldquo;bad&rdquo; since there is likely more variation in what is disliked about a show.</p>
+
+<p>Just a quick note: what is going on with episode 79? <em>The Incredible Sinking Lorelais</em> (season 4, episode 14) got two pretty good rankings (25, 30) and then two poor rankings (105, 120). I guess that was a polarizing episode for this particular set of reviewers!</p>
+
+<p>It might be a good idea to see how the episode rankings change during each individual season. Let&rsquo;s get the data ready to make yet another plot, this time comparing seasons directly.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Calculate the average (e.g. average rank of episode 13)</span>
+avg_ep <span style="color:#666">=</span> [df[df[<span style="color:#ba2121">&#39;No. in season&#39;</span>] <span style="color:#666">==</span> episode][<span style="color:#ba2121">&#39;avg&#39;</span>]<span style="color:#666">.</span>mean() <span style="color:#008000;font-weight:bold">for</span> episode <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">1</span>,<span style="color:#666">23</span>)]
+<span style="color:#408080;font-style:italic">#std_ep = [df[df[&#39;No. in season&#39;] == episode][&#39;std&#39;].mean() for episode in range(1,23)]</span>
+
+<span style="color:#408080;font-style:italic"># Calculate the standard deviations for each average eipsode rank (with error propagation)</span>
+<span style="color:#408080;font-style:italic"># Square each element in the column and put the values in a new column</span>
+df[<span style="color:#ba2121">&#39;std_sq&#39;</span>] <span style="color:#666">=</span> df[<span style="color:#ba2121">&#39;std&#39;</span>]<span style="color:#666">**</span><span style="color:#666">2</span>
+<span style="color:#408080;font-style:italic"># Sum the squares for each episode number (e.g. the sum of squares for all 7 episode 13&#39;s)</span>
+std_prop <span style="color:#666">=</span> [df[df[<span style="color:#ba2121">&#39;No. in season&#39;</span>] <span style="color:#666">==</span> episode][<span style="color:#ba2121">&#39;std_sq&#39;</span>]<span style="color:#666">.</span><span style="color:#008000">sum</span>() <span style="color:#008000;font-weight:bold">for</span> episode <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">1</span>,<span style="color:#666">23</span>)]
+<span style="color:#408080;font-style:italic"># Take the square root for each sum of squares</span>
+std_prop <span style="color:#666">=</span> np<span style="color:#666">.</span>sqrt(std_prop)
+
+<span style="color:#408080;font-style:italic"># Make separate lists for the error in ranking (makes plotting call less messy)</span>
+yerr_m <span style="color:#666">=</span> [x1 <span style="color:#666">-</span> x2 <span style="color:#008000;font-weight:bold">for</span> (x1, x2) <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">zip</span>(avg_ep, std_prop)]
+yerr_p <span style="color:#666">=</span> [x1 <span style="color:#666">+</span> x2 <span style="color:#008000;font-weight:bold">for</span> (x1, x2) <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">zip</span>(avg_ep, std_prop)]</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">plt<span style="color:#666">.</span>style<span style="color:#666">.</span>use(<span style="color:#ba2121">&#39;fivethirtyeight&#39;</span>)
+rcParams[<span style="color:#ba2121">&#39;figure.figsize&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">12</span>, <span style="color:#666">6</span>
+
+ggcolor <span style="color:#666">=</span> [<span style="color:#ba2121">&#39;r&#39;</span>, <span style="color:#ba2121">&#39;orange&#39;</span>, <span style="color:#ba2121">&#39;y&#39;</span>, <span style="color:#ba2121">&#39;g&#39;</span>, <span style="color:#ba2121">&#39;c&#39;</span>, <span style="color:#ba2121">&#39;b&#39;</span>, <span style="color:#ba2121">&#39;purple&#39;</span>]
+columns <span style="color:#666">=</span> [<span style="color:#ba2121">&#39;Season 1&#39;</span>,<span style="color:#ba2121">&#39;Season 2&#39;</span>,<span style="color:#ba2121">&#39;Season 3&#39;</span>,<span style="color:#ba2121">&#39;Season 4&#39;</span>,<span style="color:#ba2121">&#39;Season 5&#39;</span>,<span style="color:#ba2121">&#39;Season 6&#39;</span>,<span style="color:#ba2121">&#39;Season 7&#39;</span>]
+
+<span style="color:#008000;font-weight:bold">for</span> i <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">1</span>,<span style="color:#666">8</span>):
+    plt<span style="color:#666">.</span>plot(df[df[<span style="color:#ba2121">&#39;Season&#39;</span>] <span style="color:#666">==</span> i][<span style="color:#ba2121">&#39;No. in season&#39;</span>], df[df[<span style="color:#ba2121">&#39;Season&#39;</span>] <span style="color:#666">==</span> i][<span style="color:#ba2121">&#39;avg&#39;</span>], linewidth<span style="color:#666">=</span><span style="color:#666">1</span>, marker<span style="color:#666">=</span><span style="color:#ba2121">&#39;.&#39;</span>, 
+             label<span style="color:#666">=</span>columns[i<span style="color:#666">-</span><span style="color:#666">1</span>], color<span style="color:#666">=</span>ggcolor[i<span style="color:#666">-</span><span style="color:#666">1</span>])
+    
+plt<span style="color:#666">.</span>plot(df[df[<span style="color:#ba2121">&#39;Season&#39;</span>] <span style="color:#666">==</span> i][<span style="color:#ba2121">&#39;No. in season&#39;</span>], yerr_m, 
+         linestyle<span style="color:#666">=</span><span style="color:#ba2121">&#39;--&#39;</span> , linewidth<span style="color:#666">=</span><span style="color:#666">0.75</span>, color<span style="color:#666">=</span><span style="color:#ba2121">&#39;k&#39;</span>, label<span style="color:#666">=</span><span style="color:#ba2121">&#39;Uncertainity&#39;</span>)
+plt<span style="color:#666">.</span>plot(df[df[<span style="color:#ba2121">&#39;Season&#39;</span>] <span style="color:#666">==</span> i][<span style="color:#ba2121">&#39;No. in season&#39;</span>], yerr_p, 
+         linestyle<span style="color:#666">=</span><span style="color:#ba2121">&#39;--&#39;</span> , linewidth<span style="color:#666">=</span><span style="color:#666">0.75</span>, color<span style="color:#666">=</span><span style="color:#ba2121">&#39;k&#39;</span>)
+    
+plt<span style="color:#666">.</span>axis((<span style="color:#666">0.5</span>,<span style="color:#666">23</span>,<span style="color:#666">200</span>,<span style="color:#666">-</span><span style="color:#666">45</span>)), plt<span style="color:#666">.</span>grid(which<span style="color:#666">=</span><span style="color:#ba2121">&#39;minor&#39;</span>)
+plt<span style="color:#666">.</span>title(<span style="color:#ba2121">&#39;Gilmore Girls Episode Rankings&#39;</span>)
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Episode Number&#39;</span>), plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Average Rank&#39;</span>)
+plt<span style="color:#666">.</span>axvspan(<span style="color:#666">12</span>, <span style="color:#666">14</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.1</span>, color<span style="color:#666">=</span><span style="color:#ba2121">&#39;cyan&#39;</span>, label<span style="color:#666">=</span><span style="color:#ba2121">&#39;Jan-Feb Sweeps&#39;</span>)
+plt<span style="color:#666">.</span>axvspan(<span style="color:#666">19</span>, <span style="color:#666">21</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.2</span>, color<span style="color:#666">=</span><span style="color:#ba2121">&#39;yellow&#39;</span>, label<span style="color:#666">=</span><span style="color:#ba2121">&#39;Apr-May Sweeps&#39;</span>)
+plt<span style="color:#666">.</span>legend(loc<span style="color:#666">=</span><span style="color:#666">9</span>, bbox_to_anchor<span style="color:#666">=</span>(<span style="color:#666">0.5</span>, <span style="color:#666">-</span><span style="color:#666">0.15</span>), ncol<span style="color:#666">=</span><span style="color:#666">5</span>, numpoints<span style="color:#666">=</span><span style="color:#666">1</span>, fontsize<span style="color:#666">=</span><span style="color:#666">16</span>)</code></pre></div>
+<p><img src="/images/gilmore_girls/output_10_1.png" alt="png" /></p>
+
+<h3 id="the-lorelai-sweeps">The Lorelai Sweeps?</h3>
+
+<p>This is a fun plot! It&rsquo;s a little bit busy, but we still see some general trends in how the episode rankings change over a season. Except for Season 7 (poor Season 7), the season openers begin with moderately decent rankings. The rankings bounce around a bit until the January-February and April-May sweeps, where there is a definite increase in the average rankings for most of the seasons. Finishing up with each season, we continue with a few more ups and downs before ending with a high-ranked finale, except for Season 1 which had a lower ranking finale compare to the season opener.</p>
+
+<p>The uncertainity in the standard deviation is pretty big, though. With only four sets of rankings, if any one of the rankings is a bit higher or lower than the others, the uncertainity will be large and propagate through. I debated even plotting the uncertainity here but I thought it was important to keep in mind when looking at the overall season rankings. So, using the rankings, which season was the best overall?</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Calculate the average and uncertainity of the rankings for each season</span>
+<span style="color:#408080;font-style:italic"># Create a dataframe to summarize the results (because it prints a pretty table)</span>
+df2 <span style="color:#666">=</span> pd<span style="color:#666">.</span>DataFrame(columns<span style="color:#666">=</span>[<span style="color:#ba2121">&#39;Season&#39;</span>, <span style="color:#ba2121">&#39;Season average&#39;</span>, <span style="color:#ba2121">&#39;Season std&#39;</span>])
+df2[<span style="color:#ba2121">&#39;Season&#39;</span>] <span style="color:#666">=</span> np<span style="color:#666">.</span>arange(<span style="color:#666">1</span>,<span style="color:#666">8</span>)
+df2[<span style="color:#ba2121">&#39;Season average&#39;</span>] <span style="color:#666">=</span> [df[df[<span style="color:#ba2121">&#39;Season&#39;</span>] <span style="color:#666">==</span> season][<span style="color:#ba2121">&#39;avg&#39;</span>]<span style="color:#666">.</span>mean() <span style="color:#008000;font-weight:bold">for</span> season <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">1</span>,<span style="color:#666">8</span>)]
+<span style="color:#408080;font-style:italic"># Calculate the propagated uncertainity (sum the squares, take the square root)</span>
+df2[<span style="color:#ba2121">&#39;Season std&#39;</span>] <span style="color:#666">=</span> [df[df[<span style="color:#ba2121">&#39;Season&#39;</span>] <span style="color:#666">==</span> season][<span style="color:#ba2121">&#39;std_sq&#39;</span>]<span style="color:#666">.</span><span style="color:#008000">sum</span>() <span style="color:#008000;font-weight:bold">for</span> season <span style="color:#a2f;font-weight:bold">in</span> <span style="color:#008000">range</span>(<span style="color:#666">1</span>,<span style="color:#666">8</span>)]
+df2[<span style="color:#ba2121">&#39;Season std&#39;</span>] <span style="color:#666">=</span> df2[<span style="color:#ba2121">&#39;Season std&#39;</span>]<span style="color:#666">.</span><span style="color:#008000">apply</span>(np<span style="color:#666">.</span>sqrt)
+
+df2 <span style="color:#666">=</span> df2<span style="color:#666">.</span>sort_values(by<span style="color:#666">=</span>[<span style="color:#ba2121">&#39;Season average&#39;</span>], ascending<span style="color:#666">=</span>True)</code></pre></div>
+<p><strong>Season 4</strong> &ndash; 65 (+/- 149)<br />
+<strong>Season 2</strong> &ndash; 68 (+/- 157)<br />
+<strong>Season 3</strong> &ndash; 72 (+/- 143)<br />
+<strong>Season 1</strong> &ndash; 72 (+/- 175)<br />
+<strong>Season 5</strong> &ndash; 72 (+/- 190)<br />
+<strong>Season 6</strong> &ndash; 87 (+/- 180)<br />
+<strong>Season 7</strong> &ndash; 103 (+/- 125)</p>
+
+<p>It looks like season 4 is the winner!  But not significantly. The uncertainity is really big, so all the seasons are essentially ranked about the same. Season 7 does stand out (a little) with a lower rank and smaller uncertainity, but even that is not actually significant. All the seasons can be first! With lots many more sets of rankings, that uncertainity would go way down. So, if you really want to know the best season, then time to get reviewing. We&rsquo;ll need a lot more coffee.</p>
+
+<h3 id="the-end">The End</h3>
+
+<p>So we have come to the end of this analysis of the Gilmore Girls episode rankings. I hope that this has been as interesting for you as it was for me. There is definitely more to the rankings than I initially thought, and so I really enjoyed putting together this analysis. A big thanks to the writers who carefully watched <em>every single episode</em> and thoughtfully ranked them. And a special thanks to my daughter, who patiently read out list after list for me to enter in my spreadsheet. She has been motivated to begin learning some Python (and to watch the new episodes, of course).</p>
+
+
+
+      </main>
+    </div>
+    
+<footer id="footer" class="mt-auto text-center text-muted">
+  <div class="container">
+    Made with <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/zwbetz-gh/vanilla-bootstrap-hugo-theme">Vanilla</a>
+  </div>
+</footer>
+
+    <script src="https://www.nicolew.xyz/js/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>
+
+
+    
+  
+
+  </body>
+</html>

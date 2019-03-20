@@ -289,4 +289,4 @@ kilauea2018.close()
 
 #### Interactive plot!
 
-Check out the interactive image [here:](localhost:1313/bokeh/kilauea2018/kilauea2018.html)
+Check out the [interactive image](https://www.nicolew.xyz/bokeh/kilauea2018/kilauea2018.html)!

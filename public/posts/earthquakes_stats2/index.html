@@ -1,0 +1,421 @@
+<!doctype html>
+
+<html lang="en" class="h-100">
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="generator" content="Hugo 0.54.0" />
+  <link rel="stylesheet" href="https://www.nicolew.xyz/css/bootstrap.min.css">
+  
+  
+  <title>Earthquake Statistics - Frequency and Magnitude | Nicole W</title>
+  <style>
+.container {
+  max-width: 700px;
+}
+#nav a {
+  font-weight: bold;
+  color: inherit;
+}
+#nav a.nav-link-active {
+  background-color: #212529;
+  color: #fff;
+}
+#nav-border {
+  border-bottom: 1px solid #212529;
+}
+#main {
+  margin-top: 1em;
+  margin-bottom: 4em;
+}
+#home-jumbotron {
+  background-color: inherit;
+}
+#footer .container {
+  padding: 1em 0;
+}
+#footer a {
+  color: inherit;
+  text-decoration: underline;
+}
+.font-125 {
+  font-size: 125%;
+}
+.tag-btn {
+  margin-bottom: 0.3em;
+}
+pre {
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 16px;
+}
+pre code {
+  padding: 0;
+  font-size: inherit;
+  color: inherit; 
+  background-color: transparent;
+  border-radius: 0;
+}
+code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #c7254e;
+  background-color: #f9f2f4;
+  border-radius: 4px;
+}
+img,
+iframe,
+embed,
+video,
+audio {
+  max-width: 100%;
+}
+</style>
+</head>
+  <body class="d-flex flex-column h-100">
+    <div id="nav-border" class="container">
+  <nav id="nav" class="nav justify-content-center">
+  
+  
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/"><i data-feather="home"></i> Home</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/posts/"><i data-feather="edit"></i> Blog</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/tags/"><i data-feather="tag"></i> Tags</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/about/"><i data-feather="smile"></i> About</a>
+  
+    
+    
+      
+      
+      
+      
+        
+      
+    
+    
+    <a class="nav-link " href="/index.xml"><i data-feather="rss"></i> RSS</a>
+  
+  </nav>
+</div>
+    <div class="container">
+      <main id="main">
+        
+
+<h1>Earthquake Statistics - Frequency and Magnitude</h1>
+
+
+<p>In a <a href="https://www.nicolew.xyz/blog/2018/03/19/earthquake-statistics-when-and-how-many/">previous blog post</a>, I looked at the number of earthquakes greater than magnitude 6 that occurred globally between 1983 and 2017, and how these events were distributed over different time intervals. While it is useful to look at general seismicity rates over certain time periods, it is also important to understand how the magnitudes of earthquakes are distributed. In other words, how frequently do big events happen compared to small ones?</p>
+
+<p>The data used for this post is described in more detail in the blog post linked above and was obtained from the <a href="https://earthquake.usgs.gov/earthquakes/search/">USGS Earthquake catalogue</a>. Let&rsquo;s load in the data and get started.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Load in the csv file of earthquakes M6 and greater</span>
+<span style="color:#408080;font-style:italic"># globally from 1 January, 1970 (source: USGS)</span>
+
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">pandas</span> <span style="color:#008000;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">pd</span>
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">numpy</span> <span style="color:#008000;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">np</span>
+
+df <span style="color:#666">=</span> pd<span style="color:#666">.</span>read_csv(<span style="color:#ba2121">&#39;/home/nicole/seismology/stats/eq_1970_M6.csv&#39;</span>)
+<span style="color:#008000;font-weight:bold">print</span>(<span style="color:#ba2121">&#39;Total number of earthquakes:&#39;</span>,df<span style="color:#666">.</span>shape[<span style="color:#666">0</span>])
+df<span style="color:#666">.</span>head()</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">Total number of earthquakes: 6714</pre></div>
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th></th>
+      <th>time</th>
+      <th>latitude</th>
+      <th>longitude</th>
+      <th>depth</th>
+      <th>mag</th>
+      <th>magType</th>
+      <th>place</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2017-12-15T16:47:58.230Z</td>
+      <td>-7.4921</td>
+      <td>108.1743</td>
+      <td>90.0</td>
+      <td>6.5</td>
+      <td>mww</td>
+      <td>1km E of Kampungbaru, Indonesia</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2017-12-13T18:03:43.920Z</td>
+      <td>-54.2189</td>
+      <td>2.1628</td>
+      <td>17.0</td>
+      <td>6.5</td>
+      <td>mww</td>
+      <td>80km WNW of Bouvet Island, Bouvet Island</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2017-12-12T21:41:31.140Z</td>
+      <td>30.8275</td>
+      <td>57.2982</td>
+      <td>8.0</td>
+      <td>6.0</td>
+      <td>mww</td>
+      <td>63km NNE of Kerman, Iran</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2017-12-12T08:43:18.320Z</td>
+      <td>30.7372</td>
+      <td>57.2795</td>
+      <td>12.0</td>
+      <td>6.0</td>
+      <td>mww</td>
+      <td>53km NNE of Kerman, Iran</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2017-12-09T15:14:24.770Z</td>
+      <td>10.0928</td>
+      <td>140.2016</td>
+      <td>10.0</td>
+      <td>6.1</td>
+      <td>mww</td>
+      <td>50km NW of Fais, Micronesia</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>This data set includes a total of 6714 events that are magnitude 6 and above from 1970 through the end of 2017. The information for each event includes the date and time, coordinates, depth (in km), magnitude, magnitude type, and place name. This analysis will focus on how many earthquakes occur at each magnitude.</p>
+
+<h3 id="earthquake-magnitudes">Earthquake magnitudes</h3>
+
+<p>We can see that each event has a magnitude and magnitude type. Let&rsquo;s take a brief detour into seismology and review what an earthquake magnitude measures and the magnitude types used most often by seismologists.</p>
+
+<p>The size of an earthquake can be represented in a number of ways, but the most common metric is to use the earthquake <em>magnitude</em>. An earthquake magnitude is determined by measuring the maximum amplitude of the recorded seismic waves on a seismogram (record of ground motion). All earthquake magnitude scales are logarithmic, with an increase of one magnitude corresponding to an increase in the recorded amplitude by a factor of ten. For example, a M 8 event would have a recorded amplitude 100 times greater than a M 6 event, on the same magnitude scale.</p>
+
+<p>Because earthquakes large and small are recorded over a range of distances with instruments that have different responses to ground motion, there is a need for different magnitude scales. You can find a review of these magnitude scales <a href="https://earthquake.usgs.gov/earthquakes/eventpage/terms.php">here</a>, so I won&rsquo;t go into a lot of detail.</p>
+
+<h4 id="moment-magnitude">Moment magnitude</h4>
+
+<p>A newer magnitude scale that worked better for larger events was developed in the late 1970s and was calibrated to agree with other scales in use at the time. This scale is based on the moment of an earthquake, which is based on physical properties of the fault rupture that generates the earthquake. The moment magnitude scale is denoted by an Mw (also Mww, Mwc, Mwr, Mwb). A large percentage of earthquakes Mw &gt; 5 are recorded using the moment magnitude scale.</p>
+
+<p>Before we look at the number of earthquakes at different magnitudes, let&rsquo;s first take a look at the magnitude types that are present in our data set. We can also use this as an opportunity to make a stacked bar chart. Because, like bow ties, stacked bar charts are cool.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># List the magnitude types</span>
+df[<span style="color:#ba2121">&#39;magType&#39;</span>]<span style="color:#666">.</span>value_counts()</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">mw     2128
+mwc    1602
+mww     957
+mwb     919
+ms      708
+mb      379
+ml       14
+mh        3
+mwr       2
+md        2
+Name: magType, dtype: int64</pre></div>
+<p>We have ten different magnitude types but only six of them are used frequently; let&rsquo;s use just the top six in the bar chart plot.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Create an array of the top magnitudes to keep</span>
+<span style="color:#408080;font-style:italic"># (will be used for plotting later)</span>
+mag_keep <span style="color:#666">=</span> np<span style="color:#666">.</span>asarray(df[<span style="color:#ba2121">&#39;magType&#39;</span>]<span style="color:#666">.</span>value_counts()<span style="color:#666">.</span>head(<span style="color:#666">6</span>)<span style="color:#666">.</span>index)
+
+<span style="color:#408080;font-style:italic"># Change the type from &#39;object&#39; to &#39;string&#39;</span>
+mag_keep <span style="color:#666">=</span> mag_keep<span style="color:#666">.</span>astype(<span style="color:#008000">str</span>)</code></pre></div>
+<h3 id="plotting-magnitude-types">Plotting magnitude types</h3>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Import stuff for plotting</span>
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">matplotlib</span> <span style="color:#008000;font-weight:bold">import</span> pyplot <span style="color:#008000;font-weight:bold">as</span> plt
+<span style="color:#666">%</span>matplotlib inline
+
+<span style="color:#408080;font-style:italic"># Seaborn for plotting and styling</span>
+<span style="color:#008000;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">seaborn</span> <span style="color:#008000;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">sns</span>
+
+<span style="color:#408080;font-style:italic"># Settings for all figures</span>
+plt<span style="color:#666">.</span>rcParams[<span style="color:#ba2121">&#39;axes.labelsize&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">16</span>
+plt<span style="color:#666">.</span>rcParams[<span style="color:#ba2121">&#39;axes.titlesize&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">18</span>
+plt<span style="color:#666">.</span>rcParams[<span style="color:#ba2121">&#39;font.size&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">16</span>
+plt<span style="color:#666">.</span>rcParams[<span style="color:#ba2121">&#39;legend.fontsize&#39;</span>] <span style="color:#666">=</span> <span style="color:#666">14</span></code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Count the number of earthquakes for each year</span>
+
+<span style="color:#408080;font-style:italic"># Import the datetime module</span>
+<span style="color:#008000;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">datetime</span> <span style="color:#008000;font-weight:bold">import</span> datetime
+
+<span style="color:#408080;font-style:italic"># Create a datetime object column from</span>
+<span style="color:#408080;font-style:italic"># the string time column using strptime</span>
+df[<span style="color:#ba2121">&#39;dt_time&#39;</span>] <span style="color:#666">=</span> df[<span style="color:#ba2121">&#39;time&#39;</span>]<span style="color:#666">.</span><span style="color:#008000">apply</span>(
+    <span style="color:#008000;font-weight:bold">lambda</span> x: datetime<span style="color:#666">.</span>strptime(x, <span style="color:#ba2121">&#39;%Y-%m-</span><span style="color:#b68;font-weight:bold">%d</span><span style="color:#ba2121">T%H:%M:%S.</span><span style="color:#b68;font-weight:bold">%f</span><span style="color:#ba2121">Z&#39;</span>))
+
+<span style="color:#408080;font-style:italic"># Add an additional column for the year</span>
+df[<span style="color:#ba2121">&#39;year&#39;</span>] <span style="color:#666">=</span> df[<span style="color:#ba2121">&#39;dt_time&#39;</span>]<span style="color:#666">.</span><span style="color:#008000">apply</span>(<span style="color:#008000;font-weight:bold">lambda</span> x: x<span style="color:#666">.</span>year)
+
+<span style="color:#408080;font-style:italic"># Groupby year, then get counts for magnitude type</span>
+df_cut <span style="color:#666">=</span> df[[<span style="color:#ba2121">&#39;year&#39;</span>, <span style="color:#ba2121">&#39;magType&#39;</span>]]
+df_magType <span style="color:#666">=</span> df_cut<span style="color:#666">.</span>groupby(<span style="color:#ba2121">&#39;year&#39;</span>)[<span style="color:#ba2121">&#39;magType&#39;</span>]<span style="color:#666">.</span>value_counts()<span style="color:#666">.</span>unstack()
+
+<span style="color:#408080;font-style:italic"># Keep only the top 6 magnitude types for plotting</span>
+df_magType <span style="color:#666">=</span> df_magType[mag_keep]
+
+<span style="color:#408080;font-style:italic"># Plot the dataFrame as a stacked bar chart</span>
+ax <span style="color:#666">=</span> df_magType<span style="color:#666">.</span>plot(kind<span style="color:#666">=</span><span style="color:#ba2121">&#39;bar&#39;</span>, stacked<span style="color:#666">=</span>True, 
+                     colormap<span style="color:#666">=</span><span style="color:#ba2121">&#39;magma_r&#39;</span>, figsize<span style="color:#666">=</span>(<span style="color:#666">14</span>,<span style="color:#666">6</span>))
+ax<span style="color:#666">.</span>set_ylim([<span style="color:#666">0</span>, <span style="color:#666">250</span>])
+ax<span style="color:#666">.</span>legend(loc<span style="color:#666">=</span><span style="color:#ba2121">&#39;upper center&#39;</span>, ncol<span style="color:#666">=</span><span style="color:#666">6</span>)
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Year&#39;</span>), plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Number of earthquakes&#39;</span>)
+plt<span style="color:#666">.</span>title(<span style="color:#ba2121">&#39;Magnitude type distribution from 1970–2017&#39;</span>)
+plt<span style="color:#666">.</span>show()</code></pre></div>
+<p><img src="/images/eq_stats2/output_9_0.png" alt="png" /></p>
+
+<p>From the chart, we can see that the moment magnitude scale was used consistently after about 1983. I don&rsquo;t know why there seems to be a switch back to <em>ms</em> and <em>mb</em> magnitudes from 1973 to about 1982. Possibly as a result of this switch, it looks like there might be missing events between 1973 and 1983. The <em>ms</em> and <em>mb</em> magnitude scales will generally give a lower magnitude compared to the moment magnitude scale, for the same event. Between 1973 and 1982, there may have been more events of <em>M</em> 6 and above if they had been recorded with the moment magnitude scale. Since there seems to be missing events for those years and the moment magnitude scale is not used consistently, we will cut out all events from before 1983.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Cut out years 1970 - 1982</span>
+df <span style="color:#666">=</span> df[df<span style="color:#666">.</span>year <span style="color:#666">&gt;</span> <span style="color:#666">1982</span>]
+
+<span style="color:#408080;font-style:italic"># Print the minimum year in the column</span>
+<span style="color:#008000;font-weight:bold">print</span>(<span style="color:#ba2121">&#34;Earliest year of data:&#34;</span>,<span style="color:#008000">min</span>(df[<span style="color:#ba2121">&#39;year&#39;</span>]))
+
+<span style="color:#408080;font-style:italic"># Total number of earthquakes</span>
+N_tot <span style="color:#666">=</span> df[<span style="color:#ba2121">&#39;mag&#39;</span>]<span style="color:#666">.</span>count()
+<span style="color:#008000;font-weight:bold">print</span>(<span style="color:#ba2121">&#39;Total number of earthquakes:&#39;</span>, N_tot)</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">Earliest year of data: 1983
+Total number of earthquakes: 5328</pre></div>
+<h3 id="earthquake-magnitude">Earthquake Magnitude</h3>
+
+<p>Earthquakes occur over a range of magnitudes, from very small ones of magnitude 1 (and even lower) to the largest events on Earth with magnitudes over 9. The largest earthquake in recorded history was the Mw 9.5 1960 <a href="https://en.wikipedia.org/wiki/1960_Valdivia_earthquake">Valdivia earthquake</a>. This event is thought to be an example of the maximum size of an earthquake; there are no areas on Earth with larger possible rupture areas or the ability to accumulate enough stress.</p>
+
+<h4 id="earthquake-magnitude-distribution">Earthquake magnitude distribution</h4>
+
+<p>The amount of energy released during an earthquake is proportional to the magnitude. For the moment magnitude scale, an increase of one magnitude corresponds to an energy increase by a factor of ~32. We know from observation that there are more smaller earthquakes than larger ones. Fortunately, the big damaging events don&rsquo;t happen frequently. Using our catalogue data, let&rsquo;s look at this empirically.</p>
+
+<p>Counting the number of events for each magnitude between 6.0 and 9.1 (in tenths) we can visualize the distribution of frequency with magnitude. Not all magnitudes are represented so we&rsquo;ll fill in a value of zero for those indices (magnitudes).</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Number of earthquakes by magnitude</span>
+mag_tot <span style="color:#666">=</span> df[<span style="color:#ba2121">&#39;mag&#39;</span>]<span style="color:#666">.</span>value_counts()
+mag_tot<span style="color:#666">.</span>sort_index(axis<span style="color:#666">=</span><span style="color:#666">0</span>, inplace<span style="color:#666">=</span>True)
+
+<span style="color:#408080;font-style:italic"># Convert the indices of the Series to an np.ndarray</span>
+mags <span style="color:#666">=</span> np<span style="color:#666">.</span>asarray(mag_tot<span style="color:#666">.</span>index)
+
+<span style="color:#408080;font-style:italic"># Construct an array of the magnitudes </span>
+<span style="color:#408080;font-style:italic"># between 6.0 and 9.1 (step=0.1)</span>
+mags_all <span style="color:#666">=</span> np<span style="color:#666">.</span>linspace(<span style="color:#666">6.0</span>,<span style="color:#666">9.1</span>,num<span style="color:#666">=</span><span style="color:#666">32</span>)
+
+<span style="color:#408080;font-style:italic"># Compare to find at what magnitudes earthquakes didn&#39;t occur </span>
+<span style="color:#408080;font-style:italic"># (find the set difference between the two arrays)</span>
+mags_miss <span style="color:#666">=</span> np<span style="color:#666">.</span>setxor1d(mags_all,mags)
+<span style="color:#008000;font-weight:bold">print</span>(<span style="color:#ba2121">&#39;Magnitudes with no earthquakes:&#39;</span>, mags_miss)
+
+<span style="color:#408080;font-style:italic"># Add values for missing magnitudes</span>
+mag_add <span style="color:#666">=</span> pd<span style="color:#666">.</span>Series(data<span style="color:#666">=</span>np<span style="color:#666">.</span>zeros(<span style="color:#008000">len</span>(mags_miss)), index <span style="color:#666">=</span> mags_miss)
+mag_tot <span style="color:#666">=</span> pd<span style="color:#666">.</span>concat([mag_tot, mag_add])
+mag_tot<span style="color:#666">.</span>sort_index(axis<span style="color:#666">=</span><span style="color:#666">0</span>, inplace<span style="color:#666">=</span>True)</code></pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4">Magnitudes with no earthquakes: [ 8.5  8.7  8.9  9. ]</pre></div><div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Plot with all indices</span>
+plt<span style="color:#666">.</span>figure(figsize<span style="color:#666">=</span>(<span style="color:#666">12</span>,<span style="color:#666">6</span>))
+
+sns<span style="color:#666">.</span>barplot(mag_tot<span style="color:#666">.</span>index, mag_tot<span style="color:#666">.</span>values, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>, color<span style="color:#666">=</span><span style="color:#ba2121">&#39;blue&#39;</span>)
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Magnitude&#39;</span>), plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Number of Earthquakes&#39;</span>)
+plt<span style="color:#666">.</span>xticks(rotation<span style="color:#666">=</span><span style="color:#ba2121">&#39;vertical&#39;</span>)
+plt<span style="color:#666">.</span>show()</code></pre></div>
+<p><img src="/images/eq_stats2/output_14_0.png" alt="png" /></p>
+
+<h3 id="gutenberg-ndash-richter-law">Gutenberg&ndash;Richter law</h3>
+
+<p>Okay, so this is a nice power-law distribution. But, is this what is expected for earthquakes? Power-law distributions are ubiquitous in nature, from scaling in numerous biological system to the inverse-square laws of the gravitational and electrostatic forces. It shouldn&rsquo;t be a surprise that earthquake energy release also follows a power-law distribution.</p>
+
+<p>In seismology, the relationship between the frequency of earthquake occurrence and the magnitudes of those events is known as the <a href="https://en.wikipedia.org/wiki/Gutenberg%E2%80%93Richter_law">Gutenberg&ndash;Richter law</a>. In a <a href="http://resolver.caltech.edu/CaltechAUTHORS:20140731-150249818">paper published in 1956</a> by B. Gutenberg and C.F. Richter, the frequency of earthquake magnitudes was shown to follow a power-law scale. The paper focused on earthquakes in southern California but also included larger events worldwide.</p>
+
+<p>The Gutenberg&ndash;Richter law is stated as</p>
+
+<p>$log_{10} N = a-bM$</p>
+
+<p>where $N$ is the cumulative number of earthquakes greater than magnitude $M$ and $a$ and $b$ are constants. The value for $a$ is determined by the total number of events, where $N_{tot} = 10^a$. The value of $b$ is a statistical measure of the ratio of small earthquakes to large earthquakes; if $b$ is large, small earthquakes are relatively more common and if $b$ is small, large earthquakes are more common. For earthquakes worldwide, $b$=1 because we are looking at the whole Earth and not a specific geologic setting or small catalogue.</p>
+
+<p>Using the Gutenberg&ndash;Richter law, we&rsquo;ll plot it along with the earthquake occurrence values plotted in the chart above. Because the G&ndash;R law is the cumulative number of events above a given magnitude, we first need to calculate a running total.</p>
+<div class="highlight"><pre style=";-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#408080;font-style:italic"># Calculate the reverse running total </span>
+<span style="color:#408080;font-style:italic">#(i.e. all events above M6, then all above M6.1, etc.)</span>
+mag_Ntot <span style="color:#666">=</span> np<span style="color:#666">.</span>cumsum(mag_tot<span style="color:#666">.</span>values[::<span style="color:#666">-</span><span style="color:#666">1</span>])[::<span style="color:#666">-</span><span style="color:#666">1</span>]
+
+<span style="color:#408080;font-style:italic"># Plot Gutenberg-Richter relationship: N = 10**(a-bM)</span>
+a <span style="color:#666">=</span> np<span style="color:#666">.</span>log10(<span style="color:#666">1</span>)<span style="color:#666">+</span><span style="color:#666">6</span>
+M <span style="color:#666">=</span> np<span style="color:#666">.</span>linspace(<span style="color:#666">6</span>, <span style="color:#666">9.1</span>)
+N <span style="color:#666">=</span> np<span style="color:#666">.</span>power(<span style="color:#666">10</span>, (a<span style="color:#666">-</span>M))
+
+plt<span style="color:#666">.</span>figure(figsize<span style="color:#666">=</span>(<span style="color:#666">12</span>,<span style="color:#666">6</span>))
+ax1 <span style="color:#666">=</span> plt<span style="color:#666">.</span>bar(mag_tot<span style="color:#666">.</span>index, mag_Ntot<span style="color:#666">/</span>N_tot, 
+              width<span style="color:#666">=</span><span style="color:#666">0.08</span>, color<span style="color:#666">=</span><span style="color:#ba2121">&#39;blue&#39;</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.5</span>,
+              label<span style="color:#666">=</span><span style="color:#ba2121">&#39;Cumulative earthquakes 1983–2017&#39;</span>)
+ax2 <span style="color:#666">=</span> plt<span style="color:#666">.</span>plot(M, N, <span style="color:#ba2121">&#39;k&#39;</span>, linewidth <span style="color:#666">=</span> <span style="color:#666">2</span>, alpha<span style="color:#666">=</span><span style="color:#666">0.6</span>,
+         label<span style="color:#666">=</span><span style="color:#ba2121">&#39;Gutenberg–Richter equation&#39;</span>)
+plt<span style="color:#666">.</span>ylabel(<span style="color:#ba2121">&#39;Cumulative earthquakes / total number&#39;</span>)
+plt<span style="color:#666">.</span>xlabel(<span style="color:#ba2121">&#39;Magnitude&#39;</span>)
+plt<span style="color:#666">.</span>legend()
+plt<span style="color:#666">.</span>show()</code></pre></div>
+<p><img src="/images/eq_stats2/output_16_0.png" alt="png" /></p>
+
+<h3 id="don-t-worry-b-happy">Don&rsquo;t Worry, b Happy</h3>
+
+<p>Using a value of $b$=1 gives an excellent fit to this data set, as expected for a catalogue of global earthquake events over many years. The <em>b</em> value for this data set doesn&rsquo;t really tell us anything new, but for catalogues with different spatial or geographic characteristics, the b value can provide more valuable information. For example, if the fit drops off for small magnitudes, this can indicate that the catalogue is missing smaller events and is not complete.</p>
+
+<h3 id="summary">Summary</h3>
+
+<p>This purpose of this post was to explore the basics of the relationship between the frequency and magnitude of earthquakes occurring globally over a large time space. This was also a space for me to explore working with data frames and pandas and attempting to make useful plots.</p>
+
+<p>The data set used in this analysis is available <a href="https://github.com/nwhoffman/earthquake_stats/blob/master/eq_1970_M6.csv">here</a> and the Jupyter notebook is <a href="https://github.com/nwhoffman/earthquake_stats/eq_stats2.ipynb">here</a>.</p>
+
+
+
+      </main>
+    </div>
+    
+<footer id="footer" class="mt-auto text-center text-muted">
+  <div class="container">
+    Made with <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/zwbetz-gh/vanilla-bootstrap-hugo-theme">Vanilla</a>
+  </div>
+</footer>
+
+    <script src="https://www.nicolew.xyz/js/feather.min.js"></script>
+<script>
+  feather.replace()
+</script>
+
+
+    
+  
+
+  </body>
+</html>

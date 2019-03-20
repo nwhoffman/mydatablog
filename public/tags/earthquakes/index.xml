@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Earthquakes on Nicole W.</title>
-    <link>https://nicolew.xyz/tags/earthquakes/</link>
-    <description>Recent content in Earthquakes on Nicole W.</description>
+    <title>Earthquakes on Nicole W</title>
+    <link>https://www.nicolew.xyz/tags/earthquakes/</link>
+    <description>Recent content in Earthquakes on Nicole W</description>
     <generator>Hugo -- gohugo.io</generator>
-    <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
+    <language>en-us</language>
     <lastBuildDate>Thu, 14 Mar 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://nicolew.xyz/tags/earthquakes/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://www.nicolew.xyz/tags/earthquakes/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Kilauea 2018 earthquakes - Visualization with Bokeh</title>
-      <link>https://nicolew.xyz/posts/2019/03/kilauea-2018-earthquakes---visualization-with-bokeh/</link>
+      <link>https://www.nicolew.xyz/posts/kilauea_bokeh/</link>
       <pubDate>Thu, 14 Mar 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://nicolew.xyz/posts/2019/03/kilauea-2018-earthquakes---visualization-with-bokeh/</guid>
+      <guid>https://www.nicolew.xyz/posts/kilauea_bokeh/</guid>
       <description>The 2018 eruption of Kilauea volcano in Hawaii was accompanied by thousands of small earthquakes over the course of the eruption. This seismicity exhibited an interesting pattern: cycles of increasing earthquake frequency, each ending with a larger magnitude explosive event. Over the course of the 2+ month eruption, there were over 50 of these cycles.
 The Bokeh plotting library provides a lot of great tools to look at a dataset like this, where it might be useful to zoom in on certain cycles or look only at a particular date.</description>
     </item>
     
     <item>
       <title>Earthquake Statistics - Frequency and Magnitude</title>
-      <link>https://nicolew.xyz/posts/2018/04/earthquake-statistics---frequency-and-magnitude/</link>
+      <link>https://www.nicolew.xyz/posts/earthquakes_stats2/</link>
       <pubDate>Sat, 14 Apr 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://nicolew.xyz/posts/2018/04/earthquake-statistics---frequency-and-magnitude/</guid>
+      <guid>https://www.nicolew.xyz/posts/earthquakes_stats2/</guid>
       <description>In a previous blog post, I looked at the number of earthquakes greater than magnitude 6 that occurred globally between 1983 and 2017, and how these events were distributed over different time intervals. While it is useful to look at general seismicity rates over certain time periods, it is also important to understand how the magnitudes of earthquakes are distributed. In other words, how frequently do big events happen compared to small ones?</description>
     </item>
     
     <item>
       <title>Earthquake Statistics  - When and How Many</title>
-      <link>https://nicolew.xyz/posts/2018/03/earthquake-statistics----when-and-how-many/</link>
+      <link>https://www.nicolew.xyz/posts/earthquake_stats1/</link>
       <pubDate>Mon, 19 Mar 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://nicolew.xyz/posts/2018/03/earthquake-statistics----when-and-how-many/</guid>
+      <guid>https://www.nicolew.xyz/posts/earthquake_stats1/</guid>
       <description>Hundreds of earthquakes happen everyday, all over the Earth. The majority of these events are not felt by people and rarely cause any damage. But, the shaking of the ground doesn&amp;rsquo;t go unnoticed. Earthquakes large and small are detected by number of instruments, including global and local arrays of seismographs recording in locations ranging from the tops of mountains to the bottom of the ocean.
 Understanding when and where earthquakes occur is important for identifying locations where there is an increased risk from damaging earthquakes.</description>
     </item>
