@@ -280,7 +280,7 @@ First, import the necessary methods from the Bokeh library and create the html f
 from bokeh.embed import file_html
 from bokeh.resources import CDN
 
-html = file_html(p, CDN, "my plot")
+html = file_html(p, CDN, "Kilauea 2018 earthquakes")
 
 kilauea2018=open("kilauea2018.html",mode="w",encoding="utf-8")
 kilauea2018.write(html)

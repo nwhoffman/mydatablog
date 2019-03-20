@@ -53,3 +53,4 @@ pygmentsStyle = "pygments"
   homeText = "A science-y data science blog."
   footerText = "Made with [Hugo](https://gohugo.io/) & [Vanilla](https://github.com/zwbetz-gh/vanilla-bootstrap-hugo-theme)"
   hideFooter = false
+  
