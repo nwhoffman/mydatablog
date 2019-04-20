@@ -1,6 +1,6 @@
 baseURL = "https://www.nicolew.xyz"
 languageCode = "en-us"
-title = "Nicole W"
+title = "Nicole Wxyz"
 theme = "vanilla-bootstrap-hugo-theme"
 #googleAnalytics = "UA-123456789-1"
 
@@ -38,11 +38,12 @@ pygmentsStyle = "pygments"
     name = "About"
     pre = "smile"
     url = "/about/"
-    weight = 4
+    weight = 4  
+        
   [[menu.nav]]
-    name = "RSS"
-    pre = "rss"
-    url = "/index.xml"
+    name = "GitHub"
+    pre = "github"
+    url = "https://github.com/nwhoffman"
     weight = 5
 
 [params]
